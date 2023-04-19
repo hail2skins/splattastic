@@ -19,5 +19,5 @@ type User struct {
 	FirstName string   `gorm:"not null" json:"firstname"`
 	LastName  string   `gorm:"not null" json:"lastname"`
 	Admin     bool     `gorm:"default:false" json:"admin"`
-	UserType  UserType `gorm:"type:ENUM('Athlete', 'Coach', 'Owner', 'Supporter');not null" json:"usertype"`
+	UserType  UserType `gorm:"type:text;not null;check:user_type IN ('Athlete', 'Coach', 'Owner', 'Supporter')" json:"usertype"`
 }
