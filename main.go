@@ -10,7 +10,7 @@ import (
 
 func main() {
 	setup.LoadEnv()
-	//	setup.LoadDatabase()
+	setup.LoadDatabase()
 	serveApplication()
 }
 
