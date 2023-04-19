@@ -14,3 +14,12 @@ func Home(c *gin.Context) {
 			"title": "Splattastic",
 		})
 }
+
+func About(c *gin.Context) {
+	c.HTML(
+		http.StatusOK,
+		"home/about.html",
+		gin.H{
+			"title": "About",
+		})
+}

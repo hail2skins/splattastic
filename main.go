@@ -20,6 +20,7 @@ func serveApplication() {
 	r.LoadHTMLGlob("templates/**/**")
 
 	r.GET("/", controllers.Home)
+	r.GET("/about", controllers.About)
 
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")
