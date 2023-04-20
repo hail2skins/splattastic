@@ -24,12 +24,17 @@ func serveApplication() {
 	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
 	r.Use(sessions.Sessions("mysession", store))
 
+	// Define basic authentication middle to protect signup functionality
+	authMiddleware := gin.BasicAuth(gin.Accounts{
+		os.Getenv("SIGNUP_USERNAME"): os.Getenv("SIGNUP_PASSWORD"),
+	})
+
 	r.LoadHTMLGlob("templates/**/**")
 
 	r.GET("/", controllers.Home)
 	r.GET("/about", controllers.About)
 	r.GET("/login", controllers.LoginPage)
-	r.GET("/signup", controllers.SignupPage)
+	r.GET("/signup", authMiddleware, controllers.SignupPage) // Protect signup functionality
 	r.POST("/signup", controllers.Signup)
 
 	r.Static("/css", "./static/css")
