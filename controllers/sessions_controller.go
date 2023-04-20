@@ -56,7 +56,18 @@ func Signup(c *gin.Context) {
 		return
 	}
 	// Check if email and username already exists
-	available := models.CheckEmailUsernameAvailable(form.Email, form.Username)
+	available, err := models.CheckEmailUsernameAvailable(form.Email, form.Username)
+	if err != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"title": "Signup",
+				"alert": "An error occurred while checking availability",
+			},
+		)
+		return
+	}
 	if !available {
 		c.HTML(
 			http.StatusIMUsed,
@@ -80,7 +91,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 	// Create user
-	user, _ := models.UserCreate(
+	user, err := models.UserCreate(
 		form.Email,
 		form.Password,
 		form.FirstName,
@@ -88,17 +99,29 @@ func Signup(c *gin.Context) {
 		form.Username,
 		models.UserType(form.UserType), // <- Cast string to models.UserType
 	)
+	if err != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"alert": "Error creating user",
+				"title": "Signup",
+			},
+		)
+		return
+	}
+
 	if user.ID == 0 {
 		c.HTML(
 			http.StatusNotAcceptable,
 			"home/signup.html",
 			gin.H{
 				"alert": "Error creating user",
+				"title": "Signup",
 			},
 		)
 	} else {
 		helpers.SessionSet(c, uint64(user.ID))
 		c.Redirect(http.StatusMovedPermanently, "/")
 	}
-
 }
