@@ -1,0 +1,55 @@
+{{ define "partials/signup_main.html" }}
+
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <h1>Sign Up</h1>
+                <form action="/signup" method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" aria-describedby="emailHelp" name="email" required>
+                        <div id="emailHelp" class="form-text">Used for login</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="password" class="form-label">Password</label>
+                      <input type="password" class="form-control" id="password" name="password"></input>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"></input>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_type" class="form-label">User Type</label>
+                        <select class="form-select" id="user_type" name="user_type" required>
+                            <option value="">Select User Type</option>
+                            <option value="Athlete">Athlete</option>
+                            <option value="Coach">Coach</option>
+                            <option value="Owner">Owner</option>
+                            <option value="Supporter">Supporter</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="firstname" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstname" name="firstname" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="lastname" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+            </div>
+        </div>
+    </div>
+
+{{ end }}
