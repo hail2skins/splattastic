@@ -1,6 +1,13 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"errors"
+	"log"
+
+	db "github.com/hail2skins/splattastic/database"
+	"github.com/hail2skins/splattastic/helpers"
+	"gorm.io/gorm"
+)
 
 type UserType string
 
@@ -20,4 +27,55 @@ type User struct {
 	LastName  string   `gorm:"not null" json:"lastname"`
 	Admin     bool     `gorm:"default:false" json:"admin"`
 	UserType  UserType `gorm:"type:text;not null;check:user_type IN ('Athlete', 'Coach', 'Owner', 'Supporter')" json:"usertype"`
+}
+
+// CheckEmailUsernameAvailable checks if the email is available
+func CheckEmailUsernameAvailable(email string, username string) bool {
+	var user User
+	result := db.Database.Where("email = ? AND user_name = ?", email, username).First(&user)
+	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Printf("Error checking if email or username is available: %v", result.Error)
+		return false
+	}
+	return result.RowsAffected == 0
+}
+
+// GetUserByEmail gets a user by email
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	result := db.Database.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User not found")
+		}
+		log.Printf("Error getting user by email: %v", result.Error)
+		return nil, errors.New("Error getting user by email")
+	}
+	return &user, nil
+}
+
+// UserCreate creates a new user
+func UserCreate(email string, password string, username string, firstname string, lastname string, usertype UserType) (*User, error) {
+	hshPasswd, err := helpers.HashPassword(password)
+	if err != nil {
+		log.Printf("Error hashing password: %v", err)
+		return nil, errors.New("Error hashing password")
+	}
+
+	entry := User{
+		Email:     email,
+		Password:  hshPasswd,
+		UserName:  username,
+		FirstName: firstname,
+		LastName:  lastname,
+		UserType:  usertype,
+	}
+
+	result := db.Database.Create(&entry)
+	if result.Error != nil {
+		log.Printf("Error creating user: %v", result.Error)
+		return nil, errors.New("Error creating user")
+	}
+
+	return &entry, nil
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
 	"github.com/hail2skins/splattastic/setup"
@@ -17,12 +20,17 @@ func main() {
 func serveApplication() {
 	r := gin.Default()
 
+	// Configure session middleware
+	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
+	r.Use(sessions.Sessions("mysession", store))
+
 	r.LoadHTMLGlob("templates/**/**")
 
 	r.GET("/", controllers.Home)
 	r.GET("/about", controllers.About)
 	r.GET("/login", controllers.LoginPage)
 	r.GET("/signup", controllers.SignupPage)
+	r.POST("/signup", controllers.Signup)
 
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")
