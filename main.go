@@ -21,6 +21,7 @@ func serveApplication() {
 
 	r.GET("/", controllers.Home)
 	r.GET("/about", controllers.About)
+	r.GET("/login", controllers.LoginPage)
 
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")
