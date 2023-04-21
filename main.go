@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
+	"github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/setup"
 )
 
@@ -28,6 +29,8 @@ func serveApplication() {
 	authMiddleware := gin.BasicAuth(gin.Accounts{
 		os.Getenv("SIGNUP_USERNAME"): os.Getenv("SIGNUP_PASSWORD"),
 	})
+
+	r.Use(middlewares.AuthenticateUser())
 
 	r.LoadHTMLGlob("templates/**/**")
 

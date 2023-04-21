@@ -102,3 +102,17 @@ func UserFindByEmailAndPassword(email string, password string) (*User, error) {
 		return nil, errors.New("Password does not match")
 	}
 }
+
+// UserFind finds a user by id
+func UserFind(id uint64) (*User, error) {
+	var user User
+	result := db.Database.First(&user, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User not found")
+		}
+		log.Printf("Error getting user by id: %v", result.Error)
+		return nil, errors.New("Error finding user")
+	}
+	return &user, nil
+}
