@@ -157,3 +157,14 @@ func Login(c *gin.Context) {
 	helpers.SessionSet(c, uint64(user.ID))
 	c.Redirect(http.StatusMovedPermanently, "/")
 }
+
+func Logout(c *gin.Context) {
+	helpers.SessionClear(c)
+	c.HTML(
+		http.StatusOK,
+		"home/index.html",
+		gin.H{
+			"alert": "Successfully logged out",
+		},
+	)
+}
