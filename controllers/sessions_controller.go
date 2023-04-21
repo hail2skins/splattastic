@@ -56,7 +56,18 @@ func Signup(c *gin.Context) {
 		return
 	}
 	// Check if email and username already exists
-	available := models.CheckEmailUsernameAvailable(form.Email, form.Username)
+	available, err := models.CheckEmailUsernameAvailable(form.Email, form.Username)
+	if err != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"title": "Signup",
+				"alert": "An error occurred while checking availability",
+			},
+		)
+		return
+	}
 	if !available {
 		c.HTML(
 			http.StatusIMUsed,
@@ -80,7 +91,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 	// Create user
-	user, _ := models.UserCreate(
+	user, err := models.UserCreate(
 		form.Email,
 		form.Password,
 		form.FirstName,
@@ -88,17 +99,72 @@ func Signup(c *gin.Context) {
 		form.Username,
 		models.UserType(form.UserType), // <- Cast string to models.UserType
 	)
+	if err != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"alert": "Error creating user",
+				"title": "Signup",
+			},
+		)
+		return
+	}
+
 	if user.ID == 0 {
 		c.HTML(
 			http.StatusNotAcceptable,
 			"home/signup.html",
 			gin.H{
 				"alert": "Error creating user",
+				"title": "Signup",
 			},
 		)
 	} else {
 		helpers.SessionSet(c, uint64(user.ID))
 		c.Redirect(http.StatusMovedPermanently, "/")
 	}
+}
 
+func Login(c *gin.Context) {
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+
+	user, err := models.UserFindByEmailAndPassword(email, password)
+	if err != nil {
+		var alert string
+		if err.Error() == "User not found" {
+			alert = "Invalid email or password"
+		} else if err.Error() == "Error getting user by email" {
+			alert = "Invalid email or password"
+		} else if err.Error() == "Password does not match" {
+			alert = "Password does not match"
+		} else {
+			alert = "An error occurred while logging in"
+		}
+
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/login.html",
+			gin.H{
+				"alert": alert,
+				"title": "Login",
+			},
+		)
+		return
+	}
+
+	helpers.SessionSet(c, uint64(user.ID))
+	c.Redirect(http.StatusMovedPermanently, "/")
+}
+
+func Logout(c *gin.Context) {
+	helpers.SessionClear(c)
+	c.HTML(
+		http.StatusOK,
+		"home/index.html",
+		gin.H{
+			"alert": "Successfully logged out",
+		},
+	)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
+	"github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/setup"
 )
 
@@ -29,6 +30,8 @@ func serveApplication() {
 		os.Getenv("SIGNUP_USERNAME"): os.Getenv("SIGNUP_PASSWORD"),
 	})
 
+	r.Use(middlewares.AuthenticateUser())
+
 	r.LoadHTMLGlob("templates/**/**")
 
 	r.GET("/", controllers.Home)
@@ -36,6 +39,8 @@ func serveApplication() {
 	r.GET("/login", controllers.LoginPage)
 	r.GET("/signup", authMiddleware, controllers.SignupPage) // Protect signup functionality
 	r.POST("/signup", controllers.Signup)
+	r.POST("/login", controllers.Login)
+	r.POST("/logout", controllers.Logout)
 
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")

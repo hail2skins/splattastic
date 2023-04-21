@@ -30,14 +30,17 @@ type User struct {
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
-func CheckEmailUsernameAvailable(email string, username string) bool {
+func CheckEmailUsernameAvailable(email string, username string) (bool, error) {
 	var user User
-	result := db.Database.Where("email = ? AND user_name = ?", email, username).First(&user)
-	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	result := db.Database.Where("email = ? OR user_name = ?", email, username).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return true, nil
+		}
 		log.Printf("Error checking if email or username is available: %v", result.Error)
-		return false
+		return false, result.Error
 	}
-	return result.RowsAffected == 0
+	return false, nil
 }
 
 // GetUserByEmail gets a user by email
@@ -77,5 +80,39 @@ func UserCreate(email string, password string, username string, firstname string
 		return nil, errors.New("Error creating user")
 	}
 
-	return &entry, nil
+	return &entry, result.Error
+}
+
+// UserFindByEmailAndPassword finds a user by email and password for the login function
+func UserFindByEmailAndPassword(email string, password string) (*User, error) {
+	var user User
+	result := db.Database.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User not found")
+		}
+		log.Printf("Error getting user by email: %v", result.Error)
+		return nil, errors.New("Error getting user by email")
+	}
+
+	match := helpers.CheckPasswordHash(password, user.Password)
+	if match {
+		return &user, nil
+	} else {
+		return nil, errors.New("Password does not match")
+	}
+}
+
+// UserFind finds a user by id
+func UserFind(id uint64) (*User, error) {
+	var user User
+	result := db.Database.First(&user, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User not found")
+		}
+		log.Printf("Error getting user by id: %v", result.Error)
+		return nil, errors.New("Error finding user")
+	}
+	return &user, nil
 }
