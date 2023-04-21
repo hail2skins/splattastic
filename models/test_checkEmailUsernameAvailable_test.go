@@ -42,4 +42,7 @@ func TestCheckEmailUsernameAvailable(t *testing.T) {
 	available, err = CheckEmailUsernameAvailable("differentemail@example.com", "differentusername")
 	assert.NoError(t, err)
 	assert.True(t, available, "Email and username should be available")
+
+	// Cleanup
+	db.Database.Unscoped().Delete(user)
 }

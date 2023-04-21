@@ -36,6 +36,7 @@ func serveApplication() {
 	r.GET("/login", controllers.LoginPage)
 	r.GET("/signup", authMiddleware, controllers.SignupPage) // Protect signup functionality
 	r.POST("/signup", controllers.Signup)
+	r.POST("/login", controllers.Login)
 
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")
