@@ -8,4 +8,5 @@ import (
 func LoadDatabase() {
 	db.Connect()
 	db.Database.AutoMigrate(&models.User{})
+	db.Database.AutoMigrate(&models.UserType{})
 }
