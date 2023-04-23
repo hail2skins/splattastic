@@ -6,10 +6,15 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	db "github.com/hail2skins/splattastic/database"
+	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSignupPage(t *testing.T) {
+	LoadEnv()
+	db.Connect()
+
 	// Set Gin to Test Mode
 	gin.SetMode(gin.TestMode)
 
@@ -19,10 +24,16 @@ func TestSignupPage(t *testing.T) {
 	// Load the templates
 	r.LoadHTMLGlob("../templates/**/**")
 
-	// Register the LoginPage route
+	// Register the SignupPage route
 	r.GET("/signup", SignupPage)
 
-	// Create a request to the LoginPage route
+	// Create user types
+	userType1 := models.UserType{Name: "Test User Type"}
+	userType2 := models.UserType{Name: "Another Test Type"}
+	db.Database.Create(&userType1)
+	db.Database.Create(&userType2)
+
+	// Create a request to the SignupPage route
 	req, err := http.NewRequest(http.MethodGet, "/signup", nil)
 	assert.NoError(t, err)
 
@@ -35,4 +46,8 @@ func TestSignupPage(t *testing.T) {
 
 	// Check if the response contains the correct title
 	assert.Contains(t, w.Body.String(), "<title>Signup</title>")
+
+	// Cleanup
+	db.Database.Unscoped().Delete(&userType1)
+	db.Database.Unscoped().Delete(&userType2)
 }

@@ -4,18 +4,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	db "github.com/hail2skins/splattastic/database"
 	"github.com/hail2skins/splattastic/helpers"
 	"github.com/hail2skins/splattastic/models"
 )
 
 type SignupForm struct {
-	Email           string `form:"email" binding:"required" json:"email"`
-	Password        string `form:"password" binding:"required" json:"password"`
-	ConfirmPassword string `form:"confirm_password" binding:"required" json:"confirm_password"`
-	UserType        string `form:"user_type" binding:"required" json:"user_type"`
-	FirstName       string `form:"firstname" binding:"required" json:"first_name"`
-	LastName        string `form:"lastname" binding:"required" json:"last_name"`
-	Username        string `form:"username" binding:"required" json:"username"`
+	Email           string  `form:"email" binding:"required" json:"email"`
+	Password        string  `form:"password" binding:"required" json:"password"`
+	ConfirmPassword string  `form:"confirm_password" binding:"required" json:"confirm_password"`
+	UserType        *string `form:"user_type" binding:"required" json:"user_type"`
+	FirstName       string  `form:"firstname" binding:"required" json:"first_name"`
+	LastName        string  `form:"lastname" binding:"required" json:"last_name"`
+	Username        string  `form:"username" binding:"required" json:"username"`
 }
 
 // LoginPage renders the login page
@@ -29,18 +30,31 @@ func LoginPage(c *gin.Context) {
 	)
 }
 
-// SignupPage renders the signup page
 func SignupPage(c *gin.Context) {
+	// Retrieve the list of user types from the database
+	userTypes, err := models.GetUserTypes()
+	if err != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"title": "Signup",
+				"alert": "Error getting user types",
+			},
+		)
+		return
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"home/signup.html",
 		gin.H{
-			"title": "Signup",
+			"title":     "Signup",
+			"userTypes": userTypes,
 		},
 	)
 }
 
-// Signup handles the signup form submission
 func Signup(c *gin.Context) {
 	// Using binding from struct above
 	var form SignupForm
@@ -55,7 +69,8 @@ func Signup(c *gin.Context) {
 			})
 		return
 	}
-	// Check if email and username already exists
+
+	// Check if email and username already exist
 	available, err := models.CheckEmailUsernameAvailable(form.Email, form.Username)
 	if err != nil {
 		c.HTML(
@@ -79,6 +94,7 @@ func Signup(c *gin.Context) {
 		)
 		return
 	}
+
 	// Check if passwords match
 	if form.Password != form.ConfirmPassword {
 		c.HTML(
@@ -90,6 +106,22 @@ func Signup(c *gin.Context) {
 		)
 		return
 	}
+
+	// Retrieve the user type from the database
+	userType := &models.UserType{}
+	result := db.Database.Where("ID = ?", *form.UserType).First(userType)
+	if result.Error != nil {
+		c.HTML(
+			http.StatusInternalServerError,
+			"home/signup.html",
+			gin.H{
+				"alert": "Error getting user type",
+				"title": "Signup",
+			},
+		)
+		return
+	}
+
 	// Create user
 	user, err := models.UserCreate(
 		form.Email,
@@ -97,7 +129,7 @@ func Signup(c *gin.Context) {
 		form.FirstName,
 		form.LastName,
 		form.Username,
-		models.UserType(form.UserType), // <- Cast string to models.UserType
+		userType.Name,
 	)
 	if err != nil {
 		c.HTML(

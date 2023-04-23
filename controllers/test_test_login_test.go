@@ -11,12 +11,12 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
-	th "github.com/hail2skins/splattastic/controllers/testhelpers"
 	db "github.com/hail2skins/splattastic/database"
+	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLogin(t *testing.T) {
+func TestLoginSuccess(t *testing.T) {
 	// ... setup code from the previous test ...
 	LoadEnv()
 	db.Connect()
@@ -35,7 +35,20 @@ func TestLogin(t *testing.T) {
 	r.POST("/login", Login)
 
 	// Create a test user
-	user := th.CreateTestUser()
+	usertype := models.UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
+	// Create a test user with hashed password
+	user, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
+		"John",
+		"Doe",
+		"Test User Type",
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
 
 	// Create form data for login
 	form := url.Values{}
@@ -60,6 +73,7 @@ func TestLogin(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(usertype)
 }
 
 // TestLoginIncorrectEmail tests the login controller with an incorrect email which is same as an invalid or empty user that doesn't exist in the database
@@ -82,7 +96,20 @@ func TestLoginIncorrectEmail(t *testing.T) {
 	r.POST("/login", Login)
 
 	// Create a test user
-	user := th.CreateTestUser()
+	usertype := models.UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
+	// Create a test user with hashed password
+	user, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
+		"John",
+		"Doe",
+		"Test User Type",
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
 
 	// Create form data for login
 	form := url.Values{}
@@ -108,6 +135,7 @@ func TestLoginIncorrectEmail(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(usertype)
 }
 
 // TestLoginIncorrectPassword tests the login controller with an incorrect password
@@ -130,7 +158,20 @@ func TestLoginIncorrectPassword(t *testing.T) {
 	r.POST("/login", Login)
 
 	// Create a test user
-	user := th.CreateTestUser()
+	usertype := models.UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
+	// Create a test user with hashed password
+	user, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
+		"John",
+		"Doe",
+		"Test User Type",
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
 
 	// Create form data for login
 	form := url.Values{}
@@ -156,4 +197,5 @@ func TestLoginIncorrectPassword(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(usertype)
 }

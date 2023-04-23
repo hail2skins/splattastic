@@ -12,16 +12,19 @@ func TestUserCreate(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	usertype := UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
 	// Test data
 	email := "test@example.com"
 	password := "test_password"
 	username := "test_username"
 	firstname := "Test"
 	lastname := "User"
-	usertype := Athlete
+	usertypeName := usertype.Name
 
 	// Call UserCreate function
-	user, err := UserCreate(email, password, username, firstname, lastname, usertype)
+	user, err := UserCreate(email, password, username, firstname, lastname, usertypeName)
 
 	// Assert no error occurred
 	assert.NoError(t, err)
@@ -33,7 +36,7 @@ func TestUserCreate(t *testing.T) {
 	assert.Equal(t, username, user.UserName)
 	assert.Equal(t, firstname, user.FirstName)
 	assert.Equal(t, lastname, user.LastName)
-	assert.Equal(t, usertype, user.UserType)
+	assert.Equal(t, usertype.ID, user.UserTypeID)
 
 	// Check if the password is hashed
 	assert.NotEqual(t, password, user.Password)
@@ -41,4 +44,5 @@ func TestUserCreate(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(&usertype)
 }

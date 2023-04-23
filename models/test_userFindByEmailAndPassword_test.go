@@ -11,9 +11,11 @@ func TestUserFindByEmailAndPassword(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	usertype := UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
 	// Create a test user
-	// Create a test user
-	testUser, err := UserCreate("test@example.com", "testpassword", "John", "Doe", "testuser", UserType("Athlete"))
+	testUser, err := UserCreate("test@example.com", "testpassword", "John", "Doe", "testuser", usertype.Name)
 	if err != nil {
 		t.Errorf("Failed to create test user: %v", err)
 	}
@@ -36,4 +38,5 @@ func TestUserFindByEmailAndPassword(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(testUser)
+	db.Database.Unscoped().Delete(&usertype)
 }

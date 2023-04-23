@@ -12,12 +12,20 @@ func TestUserFind(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	usertype := UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
 	// Create a test user
-	// Create a test user
-	user, err := UserCreate("test@example.com", "testpassword", "John", "Doe", "testuser", UserType("Athlete"))
-	if err != nil {
-		t.Errorf("Failed to create test user: %v", err)
+	user := User{
+		Email:     "test@example.com",
+		UserName:  "testuser",
+		FirstName: "John",
+		LastName:  "Doe",
+		UserType:  usertype,
 	}
+	err := db.Database.Create(&user).Error
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
 
 	// Test that the function returns the correct user
 	result, err := UserFind(uint64(user.ID))
@@ -31,4 +39,5 @@ func TestUserFind(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(&usertype)
 }

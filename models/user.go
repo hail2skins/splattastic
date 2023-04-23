@@ -11,13 +11,14 @@ import (
 
 type User struct {
 	gorm.Model
-	Email     string   `gorm:"unique;not null" json:"email"`
-	Password  string   `gorm:"not null" json:"-"`
-	UserName  string   `gorm:"unique;not null" json:"username"`
-	FirstName string   `gorm:"not null" json:"firstname"`
-	LastName  string   `gorm:"not null" json:"lastname"`
-	Admin     bool     `gorm:"default:false" json:"admin"`
-	UserType  UserType `gorm:"not null" json:"usertype"`
+	Email      string   `gorm:"unique;not null" json:"email"`
+	Password   string   `gorm:"not null" json:"-"`
+	UserName   string   `gorm:"unique;not null" json:"username"`
+	FirstName  string   `gorm:"not null" json:"firstname"`
+	LastName   string   `gorm:"not null" json:"lastname"`
+	Admin      bool     `gorm:"default:false" json:"admin"`
+	UserTypeID uint     `gorm:"not null" json:"usertype_id"`
+	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user_type"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
@@ -49,11 +50,17 @@ func GetUserByEmail(email string) (*User, error) {
 }
 
 // UserCreate creates a new user
-func UserCreate(email string, password string, username string, firstname string, lastname string, usertype UserType) (*User, error) {
+func UserCreate(email string, password string, username string, firstname string, lastname string, usertypeName string) (*User, error) {
 	hshPasswd, err := helpers.HashPassword(password)
 	if err != nil {
 		log.Printf("Error hashing password: %v", err)
 		return nil, errors.New("Error hashing password")
+	}
+
+	var usertype UserType
+	if err := db.Database.Where("name = ?", usertypeName).First(&usertype).Error; err != nil {
+		log.Printf("Error finding usertype: %v", err)
+		return nil, errors.New("Error finding usertype")
 	}
 
 	entry := User{
@@ -71,7 +78,7 @@ func UserCreate(email string, password string, username string, firstname string
 		return nil, errors.New("Error creating user")
 	}
 
-	return &entry, result.Error
+	return &entry, nil
 }
 
 // UserFindByEmailAndPassword finds a user by email and password for the login function

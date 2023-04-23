@@ -11,9 +11,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
-	th "github.com/hail2skins/splattastic/controllers/testhelpers"
 	db "github.com/hail2skins/splattastic/database"
+	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLogout(t *testing.T) {
@@ -36,48 +37,40 @@ func TestLogout(t *testing.T) {
 	r.POST("/login", Login)
 
 	// Create a test user
-	user := th.CreateTestUser()
+	userType := models.UserType{Name: "Test User Type"}
+	require.NoError(t, db.Database.Create(&userType).Error)
+	user, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
+		"John",
+		"Doe",
+		userType.Name,
+	)
+	require.NoError(t, err)
+	require.NotNil(t, user)
 
-	// Create form data for login
-	form := url.Values{}
-	form.Add("email", user.Email)
-	form.Add("password", "testpassword")
+	// Login the test user
+	loginReq := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(
+		url.Values{
+			"email":    {user.Email},
+			"password": {"testpassword"},
+		}.Encode(),
+	))
+	loginReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	loginResp := httptest.NewRecorder()
+	r.ServeHTTP(loginResp, loginReq)
+	require.Equal(t, http.StatusMovedPermanently, loginResp.Code)
 
-	// Create a new HTTP request with form data
-	req, err := http.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// Logout the test user
+	logoutReq := httptest.NewRequest(http.MethodPost, "/logout", nil)
+	logoutReq.Header.Set("Cookie", loginResp.Header().Get("Set-Cookie"))
+	logoutResp := httptest.NewRecorder()
+	r.ServeHTTP(logoutResp, logoutReq)
+	require.Equal(t, http.StatusOK, logoutResp.Code)
+	assert.Contains(t, logoutResp.Body.String(), "Successfully logged out")
 
-	// Create a new response recorder
-	w := httptest.NewRecorder()
-
-	// Serve the request to the router
-	r.ServeHTTP(w, req)
-
-	// Create a new HTTP request to logout
-	reql, err := http.NewRequest(http.MethodPost, "/logout", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Set the session cookie from the previous response to the request
-	cookies := w.Header()["Set-Cookie"]
-	if len(cookies) == 0 {
-		t.Fatal("No cookies in the response")
-	}
-	reql.Header.Set("Cookie", cookies[0])
-
-	// Send the request to the server
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, reql)
-
-	// Check that the response status code is 200 OK
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "Successfully logged out")
-
-	// Cleanup
-	db.Database.Unscoped().Delete(user)
-
+	// Clean up the test setup
+	require.NoError(t, db.Database.Unscoped().Delete(user).Error)
+	require.NoError(t, db.Database.Unscoped().Delete(&userType).Error)
 }

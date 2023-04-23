@@ -22,10 +22,9 @@
                         <label for="user_type" class="form-label">User Type<span class="text-danger">*</span></label>
                         <select class="form-select" id="user_type" name="user_type" required>
                             <option value="">Select User Type</option>
-                            <option value="Athlete">Athlete</option>
-                            <option value="Coach">Coach</option>
-                            <option value="Owner">Owner</option>
-                            <option value="Supporter">Supporter</option>
+                            {{ range $index, $usertype := .userTypes }}
+                                <option value="{{ $usertype.ID }}">{{ $usertype.Name }}</option>
+                            {{ end }}
                         </select>
                     </div>
                     <div class="row">

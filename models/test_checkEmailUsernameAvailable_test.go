@@ -11,17 +11,20 @@ func TestCheckEmailUsernameAvailable(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	usertype := UserType{Name: "Test User Type"}
+	db.Database.Create(&usertype)
+
 	// Create a test user
 	user := User{
 		Email:     "test@example.com",
 		UserName:  "testuser",
 		FirstName: "John",
 		LastName:  "Doe",
-		UserType:  "Athlete",
-		Admin:     false,
+		UserType:  usertype,
 	}
 	err := db.Database.Create(&user).Error
 	assert.NoError(t, err)
+	assert.NotNil(t, user)
 
 	// Test with an unavailable email and username
 	available, err := CheckEmailUsernameAvailable("test@example.com", "differentusername")
@@ -45,4 +48,5 @@ func TestCheckEmailUsernameAvailable(t *testing.T) {
 
 	// Cleanup
 	db.Database.Unscoped().Delete(user)
+	db.Database.Unscoped().Delete(&usertype)
 }

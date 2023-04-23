@@ -1,0 +1,18 @@
+{{ define "partials/new_usertype_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>New User Type</h1>
+            <form action="/usertypes" method="POST">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name">
+                  <div id="nameHelp" class="form-text">Name of User Type</div>
+                </div>
+               
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>   
+        </div>
+    </div>
+</div>
+{{ end }}
