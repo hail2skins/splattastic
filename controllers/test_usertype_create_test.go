@@ -12,14 +12,12 @@ import (
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	db "github.com/hail2skins/splattastic/database"
-	"github.com/hail2skins/splattastic/middlewares"
 	m "github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
 
-// TestUserTypeNew function to test the new user type page
-func TestUserTypeNew(t *testing.T) {
+func TestUserTypeCreate(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
@@ -40,66 +38,62 @@ func TestUserTypeNew(t *testing.T) {
 
 	r.POST("/login", Login)
 
-	admin := r.Group("/admin", middlewares.RequireAdmin())
+	admin := r.Group("/admin")
 	{
 		usertypes := admin.Group("/usertypes")
 		{
 			usertypes.GET("/new", UserTypeNew)
+			usertypes.POST("/", UserTypeCreate)
 		}
 	}
 
 	// Create a test user type
-	adminUserType := models.UserType{Name: "Admin"}
-	db.Database.Create(&adminUserType)
+	testUserType := models.UserType{Name: "TestType"}
+	db.Database.Create(&testUserType)
 
 	// Create a test user with hashed password and set its user type to admin
-	adminUser, err := models.UserCreate(
-		"admin@example.com",
-		"adminpassword",
-		"adminuser",
+	testUser, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
 		"John",
 		"Doe",
-		"Admin",
+		"TestType",
 	)
 	assert.NoError(t, err)
-	assert.NotNil(t, adminUser)
-	// Set the admin flag to true
-	adminUser.Admin = true
-	db.Database.Save(&adminUser)
+	assert.NotNil(t, testUser)
 
-	// Login as the admin user
+	// Create a request with POST method and form data
 	form := url.Values{}
-	form.Add("email", adminUser.Email)
-	form.Add("password", "adminpassword")
-
-	req, err := http.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
+	form.Add("name", "Test UserType")
+	req, err := http.NewRequest(http.MethodPost, "/admin/usertypes", strings.NewReader(form.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
+	// Create a new response recorder
 	w := httptest.NewRecorder()
 
-	r.ServeHTTP(w, req)
-
-	// Navigate to /admin/usertypes/new
-	req, err = http.NewRequest(http.MethodGet, "/admin/usertypes/new", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Set the session cookie to the one from the login
-	for _, cookie := range w.Result().Cookies() {
-		req.AddCookie(cookie)
-	}
-
-	w = httptest.NewRecorder()
-
-	r.ServeHTTP(w, req)
+	// Call the UserTypeCreate function directly with the request and response recorder
+	UserTypeCreate(ginContext(req, w))
 
 	// Check the response status code
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	// Check that the user type was created in the database
+	var userType models.UserType
+	db.Database.Where("name = ?", "Test UserType").First(&userType)
+	assert.Equal(t, "Test UserType", userType.Name)
+
 	// Cleanup
-	db.Database.Unscoped().Delete(adminUser)
-	db.Database.Unscoped().Delete(&adminUserType)
+	db.Database.Unscoped().Delete(&userType)
+	db.Database.Unscoped().Delete(testUser)
+	db.Database.Unscoped().Delete(&testUserType)
+}
+
+func ginContext(req *http.Request, w *httptest.ResponseRecorder) *gin.Context {
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
+	return c
 }

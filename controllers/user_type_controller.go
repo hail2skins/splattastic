@@ -23,6 +23,10 @@ func UserTypeNew(c *gin.Context) {
 // UserTypeCreate function to create a new user type
 func UserTypeCreate(c *gin.Context) {
 	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 	models.CreateUserType(name)
 	c.Redirect(http.StatusMovedPermanently, "/")
 }
