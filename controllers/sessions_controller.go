@@ -25,7 +25,8 @@ func LoginPage(c *gin.Context) {
 		http.StatusOK,
 		"home/login.html",
 		gin.H{
-			"title": "Login",
+			"title":     "Login",
+			"logged_in": helpers.IsUserLoggedIn(c),
 		},
 	)
 }

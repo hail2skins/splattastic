@@ -27,10 +27,14 @@ func AuthenticateUser() gin.HandlerFunc {
 			userPresent = (user.ID > 0)
 		}
 
-		// If user was found, set user_id and email in the gin.Context
+		// Check if user is an admin
+		isAdmin := user != nil && user.Admin
+
+		// If user was found, set user_id, email, and isAdmin in the gin.Context
 		if userPresent {
 			c.Set("user_id", user.ID)
 			c.Set("email", user.Email)
+			c.Set("isAdmin", isAdmin)
 		}
 
 		// Set the logged_in value in the gin.Context for use in templates and controllers

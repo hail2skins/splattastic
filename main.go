@@ -49,11 +49,15 @@ func serveApplication() {
 	r.Static("/js", "./static/js")
 	r.StaticFile("/favicon.ico", "./img/favicon.ico")
 
-	usertypes := r.Group("/usertypes")
+	admin := r.Group("/admin", middlewares.RequireAdmin())
 	{
-		usertypes.GET("/new", controllers.UserTypeNew)
-		usertypes.POST("/", controllers.UserTypeCreate)
+		usertypes := admin.Group("/usertypes")
+		{
+			usertypes.GET("/new", controllers.UserTypeNew)
+			usertypes.POST("/", controllers.UserTypeCreate)
+		}
 	}
+
 	log.Println("Server started")
 	r.Run(":8080") // listen and serve on localhost:8080
 }

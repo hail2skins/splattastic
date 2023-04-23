@@ -3,15 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
 )
 
 func Home(c *gin.Context) {
-	session := sessions.Default(c)
-	alert := session.Flashes("alert")
-	session.Save()
+	// Check if alert parameter exists in query string
+	alert := c.Query("alert")
+	if alert != "" {
+		// Set the alert message to the template data
+		c.Set("alert", alert)
+	}
 
 	c.HTML(
 		http.StatusOK,
