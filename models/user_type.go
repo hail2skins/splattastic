@@ -12,7 +12,7 @@ type UserType struct {
 	Name string `gorm:"unique;not null" json:"name"`
 }
 
-// GetUserTypes gets all user types
+// GetUserTypes gets all user types. used to populate signup dropdown. Also for User Types Index page in admin space.
 func GetUserTypes() ([]UserType, error) {
 	var userTypes []UserType
 	result := db.Database.Find(&userTypes)

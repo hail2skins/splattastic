@@ -30,3 +30,22 @@ func UserTypeCreate(c *gin.Context) {
 	models.CreateUserType(name)
 	c.Redirect(http.StatusMovedPermanently, "/")
 }
+
+// UserTypeIndex function to render the user type index page with title and logged_in
+func UserTypeIndex(c *gin.Context) {
+	usertypes, err := models.GetUserTypes()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"usertypes/index.html",
+		gin.H{
+			"title":     "User Types",
+			"logged_in": h.IsUserLoggedIn(c),
+			"usertypes": usertypes,
+		},
+	)
+}

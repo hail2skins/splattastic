@@ -51,8 +51,10 @@ func serveApplication() {
 
 	admin := r.Group("/admin", middlewares.RequireAdmin())
 	{
+		admin.GET("/", controllers.AdminDashboard)
 		usertypes := admin.Group("/usertypes")
 		{
+			usertypes.GET("/", controllers.UserTypeIndex)
 			usertypes.GET("/new", controllers.UserTypeNew)
 			usertypes.POST("/", controllers.UserTypeCreate)
 		}
