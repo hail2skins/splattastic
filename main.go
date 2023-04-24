@@ -52,12 +52,13 @@ func serveApplication() {
 	admin := r.Group("/admin", middlewares.RequireAdmin())
 	{
 		admin.GET("/", controllers.AdminDashboard)
-		usertypes := admin.Group("/usertypes")
-		{
-			usertypes.GET("/", controllers.UserTypeIndex)
-			usertypes.GET("/new", controllers.UserTypeNew)
-			usertypes.POST("/", controllers.UserTypeCreate)
-		}
+
+		// User types
+		admin.GET("/usertypes", controllers.UserTypeIndex)
+		admin.GET("/usertypes/new", controllers.UserTypeNew)
+		admin.POST("/usertypes", controllers.UserTypeCreate)
+
+		// Dives
 	}
 
 	log.Println("Server started")

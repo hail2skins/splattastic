@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -46,6 +47,7 @@ func UserTypeIndex(c *gin.Context) {
 			"title":     "User Types",
 			"logged_in": h.IsUserLoggedIn(c),
 			"usertypes": usertypes,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
 }

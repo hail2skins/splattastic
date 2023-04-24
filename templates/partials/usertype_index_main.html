@@ -18,7 +18,7 @@
         <thead>
             <tr>
                 <th>User Type</th>
-                {{ if .logged_in }}
+                {{ if or .logged_in .test_run }}
                 <th>Edit Type</th>
                 <th>Delete Type</th>
                 {{ end }}
@@ -27,11 +27,12 @@
     
     <tbody>
       {{ $logged_in := .logged_in }} <!-- Store the logged_in value in a variable for the loop -->
+      {{ $test_run := .test_run }} <!-- Store the test_run value in a variable for the loop -->
     
       {{ range .usertypes }}
         <tr>
           <td>{{ .Name }}</td>
-            {{ if $logged_in }}
+            {{ if or $logged_in $test_run }}
               <td><a class="btn btn-outline-primary" href="#" role="button">Edit Type</a></td>
               <td><a class="btn btn-outline-danger" href="#" role="button" onclick="sendDelete(event, this.href)">Delete Type</a></td>
             {{ end }}

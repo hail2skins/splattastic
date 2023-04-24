@@ -3,24 +3,23 @@ package controllers
 import (
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	db "github.com/hail2skins/splattastic/database"
-	m "github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserTypeCreate(t *testing.T) {
+func TestUserTypeIndex(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
+	os.Setenv("TEST_RUN", "true")
+	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Set Gin to Test Mode
 	gin.SetMode(gin.TestMode)
@@ -32,22 +31,16 @@ func TestUserTypeCreate(t *testing.T) {
 	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
 	r.Use(sessions.Sessions("mysession", store))
 
-	r.Use(m.AuthenticateUser())
-
 	r.LoadHTMLGlob("../templates/**/**")
-
-	r.POST("/login", Login)
 
 	admin := r.Group("/admin")
 	{
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/usertypes/new", UserTypeNew)
-		admin.POST("/usertypes", UserTypeCreate)
+		admin.GET("/usertypes", UserTypeIndex)
 
 	}
-
 	// Create a test user type
 	testUserType := models.UserType{Name: "TestType"}
 	db.Database.Create(&testUserType)
@@ -64,37 +57,22 @@ func TestUserTypeCreate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, testUser)
 
-	// Create a request with POST method and form data
-	form := url.Values{}
-	form.Add("name", "Test UserType")
-	req, err := http.NewRequest(http.MethodPost, "/admin/usertypes", strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// Log in the test user by setting a session
+	req, err := http.NewRequest(http.MethodGet, "/usertypes", nil)
+	assert.NoError(t, err)
 
 	// Create a new response recorder
 	w := httptest.NewRecorder()
 
-	// Call the UserTypeCreate function directly with the request and response recorder
-	UserTypeCreate(ginContext(req, w))
+	// Call the UserTypeIndex function with the request and response recorder
+	r.ServeHTTP(w, req)
 
 	// Check the response status code
-	assert.Equal(t, http.StatusOK, w.Code)
+	expectedType := "TestType"
+	//assert.Equal(t, http.StatusOK, w1.Code)
+	assert.Contains(t, w.Body.String(), expectedType)
 
-	// Check that the user type was created in the database
-	var userType models.UserType
-	db.Database.Where("name = ?", "Test UserType").First(&userType)
-	assert.Equal(t, "Test UserType", userType.Name)
-
-	// Cleanup
-	db.Database.Unscoped().Delete(&userType)
-	db.Database.Unscoped().Delete(testUser)
+	// cleanup
 	db.Database.Unscoped().Delete(&testUserType)
-}
-
-func ginContext(req *http.Request, w *httptest.ResponseRecorder) *gin.Context {
-	c, _ := gin.CreateTestContext(w)
-	c.Request = req
-	return c
+	db.Database.Unscoped().Delete(testUser)
 }

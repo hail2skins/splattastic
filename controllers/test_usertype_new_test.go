@@ -42,10 +42,10 @@ func TestUserTypeNew(t *testing.T) {
 
 	admin := r.Group("/admin", middlewares.RequireAdmin())
 	{
-		usertypes := admin.Group("/usertypes")
-		{
-			usertypes.GET("/new", UserTypeNew)
-		}
+		admin.GET("/", AdminDashboard)
+
+		// User types
+		admin.GET("/usertypes/new", UserTypeNew)
 	}
 
 	// Create a test user type
