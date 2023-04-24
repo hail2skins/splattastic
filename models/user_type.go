@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 
 	db "github.com/hail2skins/splattastic/database"
@@ -32,5 +33,19 @@ func CreateUserType(name string) (*UserType, error) {
 		return nil, result.Error
 	}
 	log.Printf("Created user type: %v", userType)
+	return &userType, nil
+}
+
+// UserTypeShow returns a single user type when selected
+func UserTypeShow(id uint64) (*UserType, error) {
+	var userType UserType
+	result := db.Database.Where("id = ?", id).First(&userType)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User Type not found")
+		}
+		log.Printf("Error getting user type: %v", result.Error)
+		return nil, errors.New("Error finding User Type")
+	}
 	return &userType, nil
 }
