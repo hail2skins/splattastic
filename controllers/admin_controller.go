@@ -15,5 +15,6 @@ func AdminDashboard(c *gin.Context) {
 		gin.H{
 			"title":     "Admin Dashboard",
 			"logged_in": h.IsUserLoggedIn(c),
+			"header":    "Dashboard",
 		})
 }

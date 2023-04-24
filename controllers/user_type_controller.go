@@ -19,6 +19,7 @@ func UserTypeNew(c *gin.Context) {
 		gin.H{
 			"title":     "New User Type",
 			"logged_in": h.IsUserLoggedIn(c),
+			"header":    "New User Type",
 		},
 	)
 }
@@ -50,6 +51,7 @@ func UserTypeIndex(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"usertypes": usertypes,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"header":    "Listing User Types",
 		},
 	)
 }
@@ -76,6 +78,34 @@ func UserTypeShow(c *gin.Context) {
 			"title":     usertype.Name,
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"header":    "Showing User Type",
+		},
+	)
+}
+
+// UserTypeEdit function to render the user type edit page form
+func UserTypeEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		fmt.Printf("Error parsing User Type id: %v\n", err)
+	}
+
+	usertype, err := models.UserTypeShow(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"usertypes/edit.html",
+		gin.H{
+			"usertype":  usertype,
+			"title":     usertype.Name,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"header":    "Editing User Type",
 		},
 	)
 }

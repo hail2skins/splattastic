@@ -1,7 +1,7 @@
 {{ define "partials/show_usertype_main.html" }}
 {{ if or .logged_in .test_run }}
-<a class="btn btn-outline-primary" href="/usertypes/edit/{{ .usertype.ID }}" role="button">Edit Note</a>
-<a class="btn btn-outline-danger" href="/notes/{{ .usertype.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Note</a>   
+<a class="btn btn-outline-primary" href="/admin/usertypes/edit/{{ .usertype.ID }}" role="button">Edit Note</a>
+<a class="btn btn-outline-danger" href="/admin/usertypes/{{ .usertype.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Note</a>   
 {{ end }}
     <!-- Post Content-->
        <article class="mb-4">

@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestUserTypeShow function to render the user type show page with name
-func TestUserTypeShow(t *testing.T) {
+// TestUserTypeEdit renders the user type edit page
+func TestUserTypeEdit(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
@@ -36,7 +36,7 @@ func TestUserTypeShow(t *testing.T) {
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/usertypes/:id", UserTypeShow)
+		admin.GET("/usertypes/edit/:id", UserTypeEdit)
 
 	}
 
@@ -56,7 +56,7 @@ func TestUserTypeShow(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, testUser)
 
-	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/"+helpers.UintToString(testUserType.ID), nil)
+	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/edit/"+helpers.UintToString(testUserType.ID), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestUserTypeShow(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// Assertions
-	expectedText := "TestType"
+	expectedText := "Editing User Type"
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), expectedText)
 

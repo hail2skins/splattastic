@@ -58,6 +58,7 @@ func serveApplication() {
 		admin.GET("/usertypes/new", controllers.UserTypeNew)
 		admin.POST("/usertypes", controllers.UserTypeCreate)
 		admin.GET("/usertypes/:id", controllers.UserTypeShow)
+		admin.GET("/usertypes/edit/:id", controllers.UserTypeEdit)
 
 		// Dives
 	}
