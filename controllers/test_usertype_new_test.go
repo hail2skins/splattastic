@@ -3,17 +3,11 @@ package controllers
 import (
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	db "github.com/hail2skins/splattastic/database"
-	"github.com/hail2skins/splattastic/middlewares"
-	m "github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,23 +18,19 @@ func TestUserTypeNew(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	// Sets the TEST_RUN env var to true for views requiring logged in user but tests that don't require a logged in user
+	os.Setenv("TEST_RUN", "true")
+	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
+
 	// Set Gin to Test Mode
 	gin.SetMode(gin.TestMode)
 
 	// Set up the test server
 	r := gin.Default()
 
-	// Sessions init
-	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-	r.Use(sessions.Sessions("mysession", store))
-
-	r.Use(m.AuthenticateUser())
-
 	r.LoadHTMLGlob("../templates/**/**")
 
-	r.POST("/login", Login)
-
-	admin := r.Group("/admin", middlewares.RequireAdmin())
+	admin := r.Group("/admin")
 	{
 		admin.GET("/", AdminDashboard)
 
@@ -63,41 +53,21 @@ func TestUserTypeNew(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, adminUser)
-	// Set the admin flag to true
-	adminUser.Admin = true
-	db.Database.Save(&adminUser)
 
-	// Login as the admin user
-	form := url.Values{}
-	form.Add("email", adminUser.Email)
-	form.Add("password", "adminpassword")
+	// Log in the test user by setting a session
+	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/new", nil)
+	assert.NoError(t, err)
 
-	req, err := http.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
+	// Create a new response recorder
 	w := httptest.NewRecorder()
 
-	r.ServeHTTP(w, req)
-
-	// Navigate to /admin/usertypes/new
-	req, err = http.NewRequest(http.MethodGet, "/admin/usertypes/new", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Set the session cookie to the one from the login
-	for _, cookie := range w.Result().Cookies() {
-		req.AddCookie(cookie)
-	}
-
-	w = httptest.NewRecorder()
-
+	// Call the UserTypeIndex function with the request and response recorder
 	r.ServeHTTP(w, req)
 
 	// Check the response status code
+	expectedText := "New User Type"
 	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), expectedText)
 
 	// Cleanup
 	db.Database.Unscoped().Delete(adminUser)

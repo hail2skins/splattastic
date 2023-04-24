@@ -8,11 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	db "github.com/hail2skins/splattastic/database"
-	m "github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,21 +19,17 @@ func TestUserTypeCreate(t *testing.T) {
 	LoadEnv()
 	db.Connect()
 
+	// Sets the TEST_RUN env var to true for views requiring logged in user but tests that don't require a logged in user
+	os.Setenv("TEST_RUN", "true")
+	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
+
 	// Set Gin to Test Mode
 	gin.SetMode(gin.TestMode)
 
 	// Set up the test server
 	r := gin.Default()
 
-	// Sessions init
-	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-	r.Use(sessions.Sessions("mysession", store))
-
-	r.Use(m.AuthenticateUser())
-
 	r.LoadHTMLGlob("../templates/**/**")
-
-	r.POST("/login", Login)
 
 	admin := r.Group("/admin")
 	{

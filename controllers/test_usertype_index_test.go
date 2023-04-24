@@ -6,8 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	db "github.com/hail2skins/splattastic/database"
 	"github.com/hail2skins/splattastic/models"
@@ -18,6 +16,8 @@ func TestUserTypeIndex(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
+
+	// Sets the TEST_RUN env var to true for views requiring logged in user but tests that don't require a logged in user
 	os.Setenv("TEST_RUN", "true")
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
@@ -26,10 +26,6 @@ func TestUserTypeIndex(t *testing.T) {
 
 	// Set up the test server
 	r := gin.Default()
-
-	// Sessions init
-	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-	r.Use(sessions.Sessions("mysession", store))
 
 	r.LoadHTMLGlob("../templates/**/**")
 
@@ -58,7 +54,7 @@ func TestUserTypeIndex(t *testing.T) {
 	assert.NotNil(t, testUser)
 
 	// Log in the test user by setting a session
-	req, err := http.NewRequest(http.MethodGet, "/usertypes", nil)
+	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes", nil)
 	assert.NoError(t, err)
 
 	// Create a new response recorder
@@ -69,7 +65,7 @@ func TestUserTypeIndex(t *testing.T) {
 
 	// Check the response status code
 	expectedType := "TestType"
-	//assert.Equal(t, http.StatusOK, w1.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), expectedType)
 
 	// cleanup
