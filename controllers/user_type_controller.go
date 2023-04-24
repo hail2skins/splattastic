@@ -109,3 +109,34 @@ func UserTypeEdit(c *gin.Context) {
 		},
 	)
 }
+
+// UserTypeUpdate function to update a user type
+func UserTypeUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		fmt.Printf("Error parsing User Type id: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User Type ID"})
+		return
+	}
+
+	usertype, err := models.UserTypeShow(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Name field is required"})
+		return
+	}
+
+	err = usertype.Update(name) // Change this line to use the updated method name
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating User Type"})
+		return
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/admin/usertypes")
+}

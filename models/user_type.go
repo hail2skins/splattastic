@@ -49,3 +49,14 @@ func UserTypeShow(id uint64) (*UserType, error) {
 	}
 	return &userType, nil
 }
+
+// Update function to update a user type
+func (usertype *UserType) Update(name string) error {
+	usertype.Name = name
+	result := db.Database.Save(usertype)
+	if result.Error != nil {
+		log.Printf("Error updating User Type: %v\n", result.Error)
+		return result.Error
+	}
+	return nil
+}
