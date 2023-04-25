@@ -10,4 +10,5 @@ func LoadDatabase() {
 	db.Database.AutoMigrate(&models.User{})
 	db.Database.AutoMigrate(&models.UserType{})
 	db.Database.AutoMigrate(&models.BoardHeight{})
+	db.Database.AutoMigrate(&models.BoardType{})
 }
