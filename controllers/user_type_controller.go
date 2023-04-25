@@ -140,3 +140,22 @@ func UserTypeUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusMovedPermanently, "/admin/usertypes")
 }
+
+// UserTypeDelete function to soft delete a user type
+func UserTypeDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		fmt.Printf("Error parsing User Type id: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User Type ID"})
+		return
+	}
+
+	err = models.UserTypeDelete(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting User Type"})
+		return
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/admin/usertypes")
+}

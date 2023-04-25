@@ -21,7 +21,7 @@
           <td><a href="/admin/usertypes/{{ .ID }}">{{ .Name }}</td></a>
             {{ if or $logged_in $test_run }}
               <td><a class="btn btn-outline-primary" href="/admin/usertypes/edit/{{ .ID }}" role="button">Edit Type</a></td>
-              <td><a class="btn btn-outline-danger" href="#" role="button" onclick="sendDelete(event, this.href)">Delete Type</a></td>
+              <td><a class="btn btn-outline-danger" href="/admin/usertypes/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Type</a></td>
             {{ end }}
           </tr>
       {{ else }}

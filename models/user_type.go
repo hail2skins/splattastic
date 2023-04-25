@@ -60,3 +60,14 @@ func (usertype *UserType) Update(name string) error {
 	}
 	return nil
 }
+
+// UserTypeDelete soft deletes a User Type
+func UserTypeDelete(id uint64) error {
+	// This only marks the deleted_at column as the current time
+	result := db.Database.Where("id = ?", id).Delete(&UserType{})
+	if result.Error != nil {
+		log.Printf("Error deleting User Type: %v\n", result.Error)
+		return result.Error
+	}
+	return nil
+}
