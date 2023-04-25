@@ -15,7 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserTypeCreate(t *testing.T) {
+// TestBoardHeightCreate is a test function that tests the BoardHeightsNew controller
+func TestBoardHeightCreate(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
@@ -37,31 +38,13 @@ func TestUserTypeCreate(t *testing.T) {
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/usertypes/new", UserTypeNew)
-		admin.POST("/usertypes", UserTypeCreate)
-
+		admin.POST("/boardheights", BoardHeightCreate)
 	}
-
-	// Create a test user type
-	testUserType := models.UserType{Name: "TestType"}
-	db.Database.Create(&testUserType)
-
-	// Create a test user with hashed password and set its user type to admin
-	testUser, err := models.UserCreate(
-		"test@example.com",
-		"testpassword",
-		"testuser",
-		"John",
-		"Doe",
-		"TestType",
-	)
-	assert.NoError(t, err)
-	assert.NotNil(t, testUser)
 
 	// Create a request with POST method and form data
 	form := url.Values{}
-	form.Add("name", "Test UserType")
-	req, err := http.NewRequest(http.MethodPost, "/admin/usertypes", strings.NewReader(form.Encode()))
+	form.Add("height", "9.5")
+	req, err := http.NewRequest(http.MethodPost, "/admin/boardheight", strings.NewReader(form.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,19 +53,17 @@ func TestUserTypeCreate(t *testing.T) {
 	// Create a new response recorder
 	w := httptest.NewRecorder()
 
-	// Call the UserTypeCreate function directly with the request and response recorder
-	UserTypeCreate(h.GinContext(req, w))
+	// Call the BoardHeightCreate function
+	BoardHeightCreate(h.GinContext(req, w))
 
 	// Check the response status code
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Check that the user type was created in the database
-	var userType models.UserType
-	db.Database.Where("name = ?", "Test UserType").First(&userType)
-	assert.Equal(t, "Test UserType", userType.Name)
+	var boardHeight models.BoardHeight
+	db.Database.Where("height = ?", 9.5).First(&boardHeight)
+	assert.Equal(t, float32(9.5), boardHeight.Height)
 
-	// Cleanup
-	db.Database.Unscoped().Delete(&userType)
-	db.Database.Unscoped().Delete(testUser)
-	db.Database.Unscoped().Delete(&testUserType)
+	// Delete the board height from the database
+	db.Database.Unscoped().Delete(&boardHeight)
 }

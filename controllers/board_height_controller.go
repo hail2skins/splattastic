@@ -3,13 +3,15 @@ package controllers
 import (
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
+	"github.com/hail2skins/splattastic/models"
 )
 
 // BoardHeightsNew renders the new board height form
-func BoardHeightsNew(c *gin.Context) {
+func BoardHeightNew(c *gin.Context) {
 	c.HTML(
 		http.StatusOK,
 		"boardheights/new.html",
@@ -20,4 +22,27 @@ func BoardHeightsNew(c *gin.Context) {
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
+}
+
+// BoardHeightCreate creates a new board height
+func BoardHeightCreate(c *gin.Context) {
+	heightStr := c.PostForm("height")
+	if heightStr == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// Convert the height to a float32
+	height, err := strconv.ParseFloat(heightStr, 32)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	_, err = models.CreateBoardHeight(float32(height))
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/admin")
 }

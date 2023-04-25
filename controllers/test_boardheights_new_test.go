@@ -34,14 +34,8 @@ func TestBoardHeightsNew(t *testing.T) {
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/boardheights/new", BoardHeightsNew)
+		admin.GET("/boardheights/new", BoardHeightNew)
 	}
-
-	// Create a test user type
-	//testBoardHeight := models.BoardHeight{Height: 9.5}
-	//db.Database.Create(&testBoardHeight)
-
-	//assert.NotNil(t, &testBoardHeight)
 
 	// Log in the test user by setting a session
 	req, err := http.NewRequest(http.MethodGet, "/admin/boardheights/new", nil)
@@ -58,6 +52,4 @@ func TestBoardHeightsNew(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), expectedText)
 
-	// Cleanup
-	// db.Database.Unscoped().Delete(&testBoardHeight)
 }
