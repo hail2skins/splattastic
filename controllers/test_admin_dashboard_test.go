@@ -67,6 +67,8 @@ func TestAdminDashboard(t *testing.T) {
 	// Check the HTML response body for the expected title
 	expectedTitle := "Admin Dashboard"
 	assert.Contains(t, w.Body.String(), expectedTitle)
+	assert.Contains(t, w.Body.String(), "User Types")
+	assert.Contains(t, w.Body.String(), "Board Heights")
 
 	// Cleanup
 	db.Database.Unscoped().Delete(testUser)

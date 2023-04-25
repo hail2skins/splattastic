@@ -24,3 +24,15 @@ func CreateBoardHeight(height float32) (*BoardHeight, error) {
 	log.Printf("Board height created: %v", boardHeight)
 	return &boardHeight, nil
 }
+
+// GetBoardHeights is a function that returns all board heights
+func GetBoardHeights() ([]BoardHeight, error) {
+	var boardHeights []BoardHeight
+	result := db.Database.Find(&boardHeights)
+	if result.Error != nil {
+		log.Printf("Error getting board heights: %v", result.Error)
+		return nil, result.Error
+	}
+
+	return boardHeights, nil
+}

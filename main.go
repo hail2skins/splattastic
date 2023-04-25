@@ -63,6 +63,7 @@ func serveApplication() {
 		admin.DELETE("/usertypes/:id", controllers.UserTypeDelete)
 
 		// Board heights
+		admin.GET("/boardheights", controllers.BoardHeightsIndex)
 		admin.GET("/boardheights/new", controllers.BoardHeightNew)
 		admin.POST("/boardheights", controllers.BoardHeightCreate)
 	}

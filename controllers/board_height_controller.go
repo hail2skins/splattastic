@@ -46,3 +46,24 @@ func BoardHeightCreate(c *gin.Context) {
 
 	c.Redirect(http.StatusMovedPermanently, "/admin")
 }
+
+// BoardHeightsIndex renders the board heights index page
+func BoardHeightsIndex(c *gin.Context) {
+	boardheights, err := models.GetBoardHeights()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"boardheights/index.html",
+		gin.H{
+			"title":        "Board Heights",
+			"logged_in":    h.IsUserLoggedIn(c),
+			"header":       "Board Heights",
+			"boardheights": boardheights,
+			"test_run":     os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
