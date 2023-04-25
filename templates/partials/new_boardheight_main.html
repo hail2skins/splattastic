@@ -1,0 +1,18 @@
+{{ define "partials/new_boardheight_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>New User Type</h1>
+            <form action="/admin/boardheights" method="POST">
+                <div class="mb-3">
+                  <label for="height" class="form-label">Height</label>
+                  <input type="height" class="form-control" id="height" aria-describedby="heightHelp" name="height">
+                  <div id="heightHelp" class="form-text">Height of dive in meters</div>
+                </div>
+               
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>   
+        </div>
+    </div>
+</div>
+{{ end }}

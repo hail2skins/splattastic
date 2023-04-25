@@ -62,7 +62,8 @@ func serveApplication() {
 		admin.POST("/usertypes/:id", controllers.UserTypeUpdate)
 		admin.DELETE("/usertypes/:id", controllers.UserTypeDelete)
 
-		// Dives
+		// Board heights
+		admin.GET("/boardheights/new", controllers.BoardHeightsNew)
 	}
 
 	log.Println("Server started")
