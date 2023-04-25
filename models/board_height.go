@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 
 	db "github.com/hail2skins/splattastic/database"
@@ -35,4 +36,19 @@ func GetBoardHeights() ([]BoardHeight, error) {
 	}
 
 	return boardHeights, nil
+}
+
+// BoardHeightShow is a function that returns a single board height
+func BoardHeightShow(id uint64) (*BoardHeight, error) {
+	var boardHeight BoardHeight
+	result := db.Database.First(&boardHeight, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("Board height not found")
+		}
+		log.Printf("Error getting board height: %v", result.Error)
+		return nil, errors.New("Error getting board height")
+	}
+
+	return &boardHeight, nil
 }
