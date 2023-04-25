@@ -63,3 +63,15 @@ func (boardheight *BoardHeight) Update(height float32) error {
 	}
 	return nil
 }
+
+// BoardHeightDelete is a function that deletes a board height
+func BoardHeightDelete(id uint64) error {
+	// Gorm only marks the deleted_at column as the current time
+	// It doesn't actually delete the record
+	result := db.Database.Delete(&BoardHeight{}, id)
+	if result.Error != nil {
+		log.Printf("Error deleting board height: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

@@ -162,3 +162,22 @@ func BoardHeightUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/boardheights")
 }
+
+// BoardHeightDelete deletes a board height
+func BoardHeightDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = models.BoardHeightDelete(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/boardheights")
+}
