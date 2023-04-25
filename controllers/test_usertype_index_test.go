@@ -12,8 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestUserTypeNew function to test the new user type page
-func TestUserTypeNew(t *testing.T) {
+func TestUserTypeIndex(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
@@ -35,27 +34,27 @@ func TestUserTypeNew(t *testing.T) {
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/usertypes/new", UserTypeNew)
-	}
+		admin.GET("/usertypes", UserTypeIndex)
 
+	}
 	// Create a test user type
-	adminUserType := models.UserType{Name: "Admin"}
-	db.Database.Create(&adminUserType)
+	testUserType := models.UserType{Name: "TestType"}
+	db.Database.Create(&testUserType)
 
 	// Create a test user with hashed password and set its user type to admin
-	adminUser, err := models.UserCreate(
-		"admin@example.com",
-		"adminpassword",
-		"adminuser",
+	testUser, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
 		"John",
 		"Doe",
-		"Admin",
+		"TestType",
 	)
 	assert.NoError(t, err)
-	assert.NotNil(t, adminUser)
+	assert.NotNil(t, testUser)
 
 	// Log in the test user by setting a session
-	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/new", nil)
+	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes", nil)
 	assert.NoError(t, err)
 
 	// Create a new response recorder
@@ -65,11 +64,11 @@ func TestUserTypeNew(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// Check the response status code
-	expectedText := "New User Type"
+	expectedType := "TestType"
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), expectedText)
+	assert.Contains(t, w.Body.String(), expectedType)
 
-	// Cleanup
-	db.Database.Unscoped().Delete(adminUser)
-	db.Database.Unscoped().Delete(&adminUserType)
+	// cleanup
+	db.Database.Unscoped().Delete(&testUserType)
+	db.Database.Unscoped().Delete(testUser)
 }

@@ -1,0 +1,38 @@
+{{ define "partials/usertype_index_main.html" }}
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User Type</th>
+                {{ if or .logged_in .test_run }}
+                <th>Edit Type</th>
+                <th>Delete Type</th>
+                {{ end }}
+            </tr>
+        </thead>
+    
+    <tbody>
+      {{ $logged_in := .logged_in }} <!-- Store the logged_in value in a variable for the loop -->
+      {{ $test_run := .test_run }} <!-- Store the test_run value in a variable for the loop -->
+    
+      {{ range .usertypes }}
+        <tr>
+          <td><a href="/admin/usertypes/{{ .ID }}">{{ .Name }}</td></a>
+            {{ if or $logged_in $test_run }}
+              <td><a class="btn btn-outline-primary" href="/admin/usertypes/edit/{{ .ID }}" role="button">Edit Type</a></td>
+              <td><a class="btn btn-outline-danger" href="/admin/usertypes/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Type</a></td>
+            {{ end }}
+          </tr>
+      {{ else }}
+          <tr>
+          <td colspan="3">No User Types yet</td>
+        </tr>
+          
+      {{ end }}
+    
+    </table>
+
+
+
+{{ end }}

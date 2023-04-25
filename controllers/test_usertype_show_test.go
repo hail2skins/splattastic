@@ -7,13 +7,14 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hail2skins/splattastic/controllers/helpers"
 	db "github.com/hail2skins/splattastic/database"
 	"github.com/hail2skins/splattastic/models"
 	"github.com/stretchr/testify/assert"
 )
 
-// TestUserTypeNew function to test the new user type page
-func TestUserTypeNew(t *testing.T) {
+// TestUserTypeShow function to render the user type show page with name
+func TestUserTypeShow(t *testing.T) {
 	// Setup code
 	LoadEnv()
 	db.Connect()
@@ -35,41 +36,45 @@ func TestUserTypeNew(t *testing.T) {
 		admin.GET("/", AdminDashboard)
 
 		// User types
-		admin.GET("/usertypes/new", UserTypeNew)
+		admin.GET("/usertypes/:id", UserTypeShow)
+
 	}
 
 	// Create a test user type
-	adminUserType := models.UserType{Name: "Admin"}
-	db.Database.Create(&adminUserType)
+	testUserType := models.UserType{Name: "TestType"}
+	db.Database.Create(&testUserType)
 
 	// Create a test user with hashed password and set its user type to admin
-	adminUser, err := models.UserCreate(
-		"admin@example.com",
-		"adminpassword",
-		"adminuser",
+	testUser, err := models.UserCreate(
+		"test@example.com",
+		"testpassword",
+		"testuser",
 		"John",
 		"Doe",
-		"Admin",
+		"TestType",
 	)
 	assert.NoError(t, err)
-	assert.NotNil(t, adminUser)
+	assert.NotNil(t, testUser)
 
-	// Log in the test user by setting a session
-	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/new", nil)
-	assert.NoError(t, err)
+	req, err := http.NewRequest(http.MethodGet, "/admin/usertypes/"+helpers.UintToString(testUserType.ID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	// Create a new response recorder
 	w := httptest.NewRecorder()
 
-	// Call the UserTypeIndex function with the request and response recorder
+	// Perform the request
 	r.ServeHTTP(w, req)
 
-	// Check the response status code
-	expectedText := "New User Type"
+	// Assertions
+	expectedText := "TestType"
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), expectedText)
 
 	// Cleanup
-	db.Database.Unscoped().Delete(adminUser)
-	db.Database.Unscoped().Delete(&adminUserType)
+	db.Database.Unscoped().Delete(testUser)
+	db.Database.Unscoped().Delete(&testUserType)
+
 }
