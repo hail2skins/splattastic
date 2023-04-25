@@ -52,3 +52,14 @@ func BoardHeightShow(id uint64) (*BoardHeight, error) {
 
 	return &boardHeight, nil
 }
+
+// Update is a method that updates a board height
+func (boardheight *BoardHeight) Update(height float32) error {
+	boardheight.Height = height
+	result := db.Database.Save(boardheight)
+	if result.Error != nil {
+		log.Printf("Error updating board height: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

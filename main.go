@@ -68,6 +68,7 @@ func serveApplication() {
 		admin.POST("/boardheights", controllers.BoardHeightCreate)
 		admin.GET("/boardheights/:id", controllers.BoardHeightShow)
 		admin.GET("/boardheights/edit/:id", controllers.BoardHeightEdit)
+		admin.POST("/boardheights/:id", controllers.BoardHeightUpdate)
 	}
 
 	log.Println("Server started")
