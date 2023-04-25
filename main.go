@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
 	"github.com/hail2skins/splattastic/middlewares"
+	"github.com/hail2skins/splattastic/routes"
 	"github.com/hail2skins/splattastic/setup"
 )
 
@@ -49,28 +50,8 @@ func serveApplication() {
 	r.Static("/js", "./static/js")
 	r.StaticFile("/favicon.ico", "./img/favicon.ico")
 
-	admin := r.Group("/admin", middlewares.RequireAdmin())
-	{
-		admin.GET("/", controllers.AdminDashboard)
-
-		// User types
-		admin.GET("/usertypes", controllers.UserTypeIndex)
-		admin.GET("/usertypes/new", controllers.UserTypeNew)
-		admin.POST("/usertypes", controllers.UserTypeCreate)
-		admin.GET("/usertypes/:id", controllers.UserTypeShow)
-		admin.GET("/usertypes/edit/:id", controllers.UserTypeEdit)
-		admin.POST("/usertypes/:id", controllers.UserTypeUpdate)
-		admin.DELETE("/usertypes/:id", controllers.UserTypeDelete)
-
-		// Board heights
-		admin.GET("/boardheights", controllers.BoardHeightsIndex)
-		admin.GET("/boardheights/new", controllers.BoardHeightNew)
-		admin.POST("/boardheights", controllers.BoardHeightCreate)
-		admin.GET("/boardheights/:id", controllers.BoardHeightShow)
-		admin.GET("/boardheights/edit/:id", controllers.BoardHeightEdit)
-		admin.POST("/boardheights/:id", controllers.BoardHeightUpdate)
-		admin.DELETE("/boardheights/:id", controllers.BoardHeightDelete)
-	}
+	adminRoutes := r.Group("/admin", middlewares.RequireAdmin())
+	routes.AdminRoutes(adminRoutes)
 
 	log.Println("Server started")
 	r.Run(":8080") // listen and serve on localhost:8080
