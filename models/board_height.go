@@ -9,9 +9,11 @@ import (
 )
 
 // BoardHeight struct represents the height of the boards/platforms a diver can jump from
+// BoardHeight is a many2many relationship with BoardType
 type BoardHeight struct {
 	gorm.Model
-	Height float32 `gorm:"unique;not null" json:"height"`
+	Height     float32     `gorm:"unique;not null" json:"height"`
+	BoardTypes []BoardType `gorm:"many2many:board_type_board_heights;"`
 }
 
 // CreateBoardHeight is a function that creates a new board height
