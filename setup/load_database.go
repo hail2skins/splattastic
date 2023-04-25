@@ -9,4 +9,5 @@ func LoadDatabase() {
 	db.Connect()
 	db.Database.AutoMigrate(&models.User{})
 	db.Database.AutoMigrate(&models.UserType{})
+	db.Database.AutoMigrate(&models.BoardHeight{})
 }
