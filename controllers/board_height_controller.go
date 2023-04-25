@@ -95,3 +95,31 @@ func BoardHeightShow(c *gin.Context) {
 		},
 	)
 }
+
+// BoardHeightEdit renders the board height edit page
+func BoardHeightEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		fmt.Printf("Error parsing id: %v\n", err)
+	}
+
+	boardheight, err := models.BoardHeightShow(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"boardheights/edit.html",
+		gin.H{
+			"title":       "Edit Board Height",
+			"logged_in":   h.IsUserLoggedIn(c),
+			"header":      "Edit Board Height",
+			"boardheight": boardheight,
+			"test_run":    os.Getenv("TEST_RUN") == "true",
+		},
+	)
+
+}
