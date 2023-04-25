@@ -1,6 +1,12 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"errors"
+	"log"
+
+	db "github.com/hail2skins/splattastic/database"
+	"gorm.io/gorm"
+)
 
 // BoardType is a model for the board_types table
 // A board type in diving is just springboard or platform.
@@ -10,4 +16,19 @@ type BoardType struct {
 	gorm.Model
 	Name         string        `gorm:"unique;not null" json:"name" form:"name" binding:"required"`
 	BoardHeights []BoardHeight `gorm:"many2many:board_type_board_heights;"`
+}
+
+// BoardTypeCreate creates a new board type
+func BoardTypeCreate(name string) (*BoardType, error) {
+	if name == "" {
+		return nil, errors.New("board type name cannot be empty")
+	}
+	boardType := BoardType{Name: name}
+	result := db.Database.Create(&boardType)
+	if result.Error != nil {
+		log.Printf("Error creating board type: %v", result.Error)
+		return nil, result.Error
+	}
+	log.Printf("Board type created: %v", boardType)
+	return &boardType, nil
 }
