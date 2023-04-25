@@ -17,8 +17,8 @@ type User struct {
 	FirstName  string   `gorm:"not null" json:"firstname"`
 	LastName   string   `gorm:"not null" json:"lastname"`
 	Admin      bool     `gorm:"default:false" json:"admin"`
-	UserTypeID uint     `gorm:"not null" json:"usertype_id"`
-	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user_type"`
+	UserTypeID uint64   `gorm:"not null" json:"usertype_id"`
+	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
