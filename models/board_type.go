@@ -14,8 +14,7 @@ import (
 // BoardType is a many2many relationship with BoardHeight
 type BoardType struct {
 	gorm.Model
-	Name         string        `gorm:"unique;not null" json:"name" form:"name" binding:"required"`
-	BoardHeights []BoardHeight `gorm:"many2many:board_type_board_heights;"`
+	Name string `gorm:"unique;not null" json:"name" form:"name" binding:"required"`
 }
 
 // BoardTypeCreate creates a new board type
