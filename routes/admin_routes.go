@@ -38,6 +38,9 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/boardtypes/edit/:id", controllers.BoardTypeEdit)
 		admin.POST("/boardtypes/:id", controllers.BoardTypeUpdate)
 		admin.DELETE("/boardtypes/:id", controllers.BoardTypeDelete)
+
+		// Dive types
+		admin.GET("/divetypes/new", controllers.DiveTypeNew)
 	}
 
 }
