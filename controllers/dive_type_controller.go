@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
+	"github.com/hail2skins/splattastic/models"
 )
 
 // DiveTypeNew renders the new dive type form
@@ -20,4 +21,15 @@ func DiveTypeNew(c *gin.Context) {
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
+}
+
+// DiveTypeCreate creates a new dive type
+func DiveTypeCreate(c *gin.Context) {
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	models.DiveTypeCreate(name)
+	c.Redirect(http.StatusFound, "/admin")
 }
