@@ -54,3 +54,14 @@ func DiveTypeShow(id uint64) (*DiveType, error) {
 	}
 	return &diveType, nil
 }
+
+// Update method updates a dive type
+func (diveType *DiveType) Update(name string) error {
+	diveType.Name = name
+	result := db.Database.Save(diveType)
+	if result.Error != nil {
+		log.Printf("Error updating dive type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

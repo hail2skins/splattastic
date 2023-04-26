@@ -116,3 +116,36 @@ func DiveTypeEdit(c *gin.Context) {
 		},
 	)
 }
+
+// DiveTypeUpdate updates a dive type
+func DiveTypeUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	divetype, err := models.DiveTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting dive type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = divetype.Update(name)
+	if err != nil {
+		log.Printf("Error updating dive type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/divetypes")
+}
