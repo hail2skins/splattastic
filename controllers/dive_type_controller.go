@@ -149,3 +149,23 @@ func DiveTypeUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/divetypes")
 }
+
+// DiveTypeDelete deletes a dive type
+func DiveTypeDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.DiveTypeDelete(id)
+	if err != nil {
+		log.Printf("Error deleting dive type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/divetypes")
+}
