@@ -69,3 +69,13 @@ func (boardType *BoardType) Update(name string) error {
 	return nil
 
 }
+
+// BoardTypeDelete soft deletes a board type
+func BoardTypeDelete(id uint64) error {
+	result := db.Database.Delete(&BoardType{}, id)
+	if result.Error != nil {
+		log.Printf("Error deleting board type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
