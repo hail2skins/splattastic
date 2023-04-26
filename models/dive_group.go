@@ -54,3 +54,14 @@ func DiveGroupShow(id uint64) (*DiveGroup, error) {
 	}
 	return &diveGroup, nil
 }
+
+// Update method updates a dive group
+func (diveGroup *DiveGroup) Update(name string) error {
+	diveGroup.Name = name
+	result := db.Database.Save(&diveGroup)
+	if result.Error != nil {
+		log.Printf("Error updating dive group: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

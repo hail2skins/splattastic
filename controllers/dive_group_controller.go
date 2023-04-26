@@ -116,3 +116,36 @@ func DiveGroupEdit(c *gin.Context) {
 		},
 	)
 }
+
+// DiveGroupUpdate updates a dive group
+func DiveGroupUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive group id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	diveGroup, err := models.DiveGroupShow(id)
+	if err != nil {
+		log.Printf("Error getting dive group: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = diveGroup.Update(name)
+	if err != nil {
+		log.Printf("Error updating dive group: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/divegroups")
+}
