@@ -31,5 +31,26 @@ func DiveGroupCreate(c *gin.Context) {
 		return
 	}
 	models.DiveGroupCreate(name)
-	c.Redirect(http.StatusFound, "/admin")
+	c.Redirect(http.StatusFound, "/admin/divegroups")
+}
+
+// DiveGroupsIndex gets all dive groups
+func DiveGroupsIndex(c *gin.Context) {
+	diveGroups, err := models.DiveGroupsGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divegroups/index.html",
+		gin.H{
+			"title":      "Dive Groups",
+			"header":     "Dive Groups",
+			"logged_in":  h.IsUserLoggedIn(c),
+			"divegroups": diveGroups,
+			"test_run":   os.Getenv("TEST_RUN") == "true",
+		},
+	)
 }

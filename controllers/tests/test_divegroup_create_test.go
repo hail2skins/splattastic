@@ -36,7 +36,7 @@ func TestDiveGroupCreate(t *testing.T) {
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
-	r.GET("/admin", controllers.AdminDashboard)
+	r.GET("/admin/divegroups", controllers.DiveGroupsIndex)
 	r.POST("/admin/divegroups", controllers.DiveGroupCreate)
 
 	// Create a response recorder so we can inspect the response
@@ -51,7 +51,7 @@ func TestDiveGroupCreate(t *testing.T) {
 	}
 
 	// Check the redirect location
-	expected := "/admin"
+	expected := "/admin/divegroups"
 	if location := rr.Header().Get("Location"); location != expected {
 		t.Errorf("handler returned unexpected redirect location: got %v want %v", location, expected)
 	}

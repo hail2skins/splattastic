@@ -29,3 +29,14 @@ func DiveGroupCreate(name string) (*DiveGroup, error) {
 	log.Printf("Dive group created: %v", diveGroup)
 	return &diveGroup, nil
 }
+
+// DiveGroupsGet gets all dive groups
+func DiveGroupsGet() ([]DiveGroup, error) {
+	var diveGroups []DiveGroup
+	result := db.Database.Find(&diveGroups)
+	if result.Error != nil {
+		log.Printf("Error getting dive groups: %v", result.Error)
+		return nil, result.Error
+	}
+	return diveGroups, nil
+}
