@@ -40,3 +40,17 @@ func DiveTypesGet() ([]DiveType, error) {
 	}
 	return diveTypes, nil
 }
+
+// DiveTypeShow gets a single dive type
+func DiveTypeShow(id uint64) (*DiveType, error) {
+	var diveType DiveType
+	result := db.Database.First(&diveType, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("dive type not found")
+		}
+		log.Printf("Error getting dive type: %v", result.Error)
+		return nil, errors.New("error getting dive type")
+	}
+	return &diveType, nil
+}

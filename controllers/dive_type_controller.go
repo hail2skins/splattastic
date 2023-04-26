@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -50,6 +52,36 @@ func DiveTypesIndex(c *gin.Context) {
 			"header":    "Dive Types",
 			"logged_in": h.IsUserLoggedIn(c),
 			"divetypes": diveTypes,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
+
+// DiveTypeShow renders the dive type show page
+func DiveTypeShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	divetype, err := models.DiveTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting dive type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divetypes/show.html",
+		gin.H{
+			"title":     "Dive Type",
+			"header":    "Dive Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"divetype":  divetype,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)

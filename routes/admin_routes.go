@@ -43,6 +43,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/divetypes", controllers.DiveTypesIndex)
 		admin.GET("/divetypes/new", controllers.DiveTypeNew)
 		admin.POST("/divetypes", controllers.DiveTypeCreate)
+		admin.GET("/divetypes/:id", controllers.DiveTypeShow)
 	}
 
 }
