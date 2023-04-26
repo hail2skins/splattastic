@@ -32,3 +32,14 @@ func BoardTypeCreate(name string) (*BoardType, error) {
 	log.Printf("Board type created: %v", boardType)
 	return &boardType, nil
 }
+
+// BoardTypesGet gets all board types
+func BoardTypesGet() ([]BoardType, error) {
+	var boardTypes []BoardType
+	result := db.Database.Find(&boardTypes)
+	if result.Error != nil {
+		log.Printf("Error getting board types: %v", result.Error)
+		return nil, result.Error
+	}
+	return boardTypes, nil
+}

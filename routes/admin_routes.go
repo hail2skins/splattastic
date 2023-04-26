@@ -31,6 +31,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.DELETE("/boardheights/:id", controllers.BoardHeightDelete)
 
 		// Board types
+		admin.GET("/boardtypes", controllers.BoardTypesIndex)
 		admin.GET("/boardtypes/new", controllers.BoardTypeNew)
 		admin.POST("/boardtypes", controllers.BoardTypeCreate)
 	}

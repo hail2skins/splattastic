@@ -36,7 +36,7 @@ func TestBoardTypeCreate(t *testing.T) {
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
-	r.GET("/admin", controllers.AdminDashboard)
+	r.GET("/admin/boardtypes", controllers.BoardTypesIndex)
 	r.POST("/admin/boardtypes", controllers.BoardTypeCreate)
 
 	// Create a response recorder so we can inspect the response
@@ -48,6 +48,12 @@ func TestBoardTypeCreate(t *testing.T) {
 	// Check the status code
 	if status := rr.Code; status != http.StatusFound {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	}
+
+	// Check the redirect location
+	expected := "/admin/boardtypes"
+	if location := rr.Header().Get("Location"); location != expected {
+		t.Errorf("handler returned unexpected redirect location: got %v want %v", location, expected)
 	}
 
 	// Check if the board type is created in the database
