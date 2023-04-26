@@ -85,3 +85,32 @@ func BoardTypeShow(c *gin.Context) {
 		},
 	)
 }
+
+// BoardTypeEdit renders the board type edit page
+func BoardTypeEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing board type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	boardtype, err := models.BoardTypeShow(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"boardtypes/edit.html",
+		gin.H{
+			"title":     "Edit Board Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"header":    "Edit Board Type",
+			"boardtype": boardtype,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}

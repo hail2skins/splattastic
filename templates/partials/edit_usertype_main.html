@@ -6,7 +6,7 @@
             <form action="/admin/usertypes/{{ .usertype.ID }}" method="POST">
                 <div class="mb-3">
                   <label for="name" class="form-label">Name</label>
-                  <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name">
+                  <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name" value="{{ .usertype.Name }}">
                   <div id="nameHelp" class="form-text">User Type name</div>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
