@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -51,6 +53,35 @@ func BoardTypesIndex(c *gin.Context) {
 			"header":     "Board Types",
 			"boardtypes": boardtypes,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
+
+// BoardTypeShow renders the board type show page
+func BoardTypeShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing board type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	boardtype, err := models.BoardTypeShow(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"boardtypes/show.html",
+		gin.H{
+			"title":     "Board Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"header":    "Board Type",
+			"boardtype": boardtype,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
 }

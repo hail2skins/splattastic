@@ -1,0 +1,16 @@
+{{ define "partials/show_boardtype_main.html" }}
+{{ if or .logged_in .test_run }}
+<a class="btn btn-outline-primary" href="/admin/boardtypes/edit/{{ .boardtype.ID }}" role="button">Edit Type</a>
+<a class="btn btn-outline-danger" href="/admin/boardtypes/{{ .boardtype.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Type</a>   
+{{ end }}
+    <!-- Post Content-->
+       <article class="mb-4">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    Type of Diving Board/Platform: {{ .boardtype.Name }}
+                </div>
+            </div>
+        </div>
+    </article>
+{{ end }}

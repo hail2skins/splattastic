@@ -34,6 +34,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/boardtypes", controllers.BoardTypesIndex)
 		admin.GET("/boardtypes/new", controllers.BoardTypeNew)
 		admin.POST("/boardtypes", controllers.BoardTypeCreate)
+		admin.GET("/boardtypes/:id", controllers.BoardTypeShow)
 	}
 
 }

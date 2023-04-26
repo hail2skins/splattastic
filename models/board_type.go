@@ -43,3 +43,17 @@ func BoardTypesGet() ([]BoardType, error) {
 	}
 	return boardTypes, nil
 }
+
+// BoardTypeShow gets a single board type
+func BoardTypeShow(id uint64) (*BoardType, error) {
+	var boardType BoardType
+	result := db.Database.First(&boardType, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("board type not found")
+		}
+		log.Printf("Error getting board type: %v", result.Error)
+		return nil, errors.New("error getting board type")
+	}
+	return &boardType, nil
+}
