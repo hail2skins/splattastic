@@ -86,3 +86,33 @@ func DiveTypeShow(c *gin.Context) {
 		},
 	)
 }
+
+// DiveTypeEdit renders the dive type edit page
+func DiveTypeEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	divetype, err := models.DiveTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting dive type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divetypes/edit.html",
+		gin.H{
+			"title":     "Edit Dive Type",
+			"header":    "Edit Dive Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"divetype":  divetype,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
