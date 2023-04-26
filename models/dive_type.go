@@ -68,7 +68,8 @@ func (diveType *DiveType) Update(name string) error {
 
 // DiveTypeDelete deletes a dive type
 func DiveTypeDelete(id uint64) error {
-	result := db.Database.Delete(&DiveType{}, id)
+	var diveType DiveType
+	result := db.Database.Delete(&diveType, id)
 	if result.Error != nil {
 		log.Printf("Error deleting dive type: %v", result.Error)
 		return result.Error

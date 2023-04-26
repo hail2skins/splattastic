@@ -149,3 +149,23 @@ func DiveGroupUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/divegroups")
 }
+
+// DiveGroupDelete deletes a dive group
+func DiveGroupDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive group id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.DiveGroupDelete(id)
+	if err != nil {
+		log.Printf("Error deleting dive group: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/divegroups")
+}

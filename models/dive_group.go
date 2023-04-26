@@ -65,3 +65,14 @@ func (diveGroup *DiveGroup) Update(name string) error {
 	}
 	return nil
 }
+
+// DiveTypeDelete deletes a dive type
+func DiveGroupDelete(id uint64) error {
+	var diveGroup DiveGroup
+	result := db.Database.Delete(&diveGroup, id)
+	if result.Error != nil {
+		log.Printf("Error deleting dive group: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
