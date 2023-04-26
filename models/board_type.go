@@ -57,3 +57,15 @@ func BoardTypeShow(id uint64) (*BoardType, error) {
 	}
 	return &boardType, nil
 }
+
+// Update method updates a board type
+func (boardType *BoardType) Update(name string) error {
+	boardType.Name = name
+	result := db.Database.Save(boardType)
+	if result.Error != nil {
+		log.Printf("Error updating board type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+
+}
