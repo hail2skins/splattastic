@@ -40,6 +40,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.DELETE("/boardtypes/:id", controllers.BoardTypeDelete)
 
 		// Dive types
+		admin.GET("/divetypes", controllers.DiveTypesIndex)
 		admin.GET("/divetypes/new", controllers.DiveTypeNew)
 		admin.POST("/divetypes", controllers.DiveTypeCreate)
 	}

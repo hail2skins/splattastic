@@ -29,3 +29,14 @@ func DiveTypeCreate(name string) (*DiveType, error) {
 	log.Printf("Dive type created: %v", diveType)
 	return &diveType, nil
 }
+
+// DiveTypesGet gets all dive types
+func DiveTypesGet() ([]DiveType, error) {
+	var diveTypes []DiveType
+	result := db.Database.Find(&diveTypes)
+	if result.Error != nil {
+		log.Printf("Error getting dive types: %v", result.Error)
+		return nil, result.Error
+	}
+	return diveTypes, nil
+}

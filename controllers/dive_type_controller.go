@@ -31,5 +31,26 @@ func DiveTypeCreate(c *gin.Context) {
 		return
 	}
 	models.DiveTypeCreate(name)
-	c.Redirect(http.StatusFound, "/admin")
+	c.Redirect(http.StatusFound, "/admin/divetypes")
+}
+
+// DiveTypesIndex gets all dive types
+func DiveTypesIndex(c *gin.Context) {
+	diveTypes, err := models.DiveTypesGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divetypes/index.html",
+		gin.H{
+			"title":     "Dive Types",
+			"header":    "Dive Types",
+			"logged_in": h.IsUserLoggedIn(c),
+			"divetypes": diveTypes,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
 }
