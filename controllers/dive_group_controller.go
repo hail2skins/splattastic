@@ -86,3 +86,33 @@ func DiveGroupShow(c *gin.Context) {
 		},
 	)
 }
+
+// DiveGroupEdit renders the dive group edit form
+func DiveGroupEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive group id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	diveGroup, err := models.DiveGroupShow(id)
+	if err != nil {
+		log.Printf("Error getting dive group: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divegroups/edit.html",
+		gin.H{
+			"title":     "Edit Dive Group",
+			"header":    "Edit Dive Group",
+			"logged_in": h.IsUserLoggedIn(c),
+			"divegroup": diveGroup,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
