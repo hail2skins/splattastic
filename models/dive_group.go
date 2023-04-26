@@ -40,3 +40,17 @@ func DiveGroupsGet() ([]DiveGroup, error) {
 	}
 	return diveGroups, nil
 }
+
+// DiveGroupShow gets a single dive group
+func DiveGroupShow(id uint64) (*DiveGroup, error) {
+	var diveGroup DiveGroup
+	result := db.Database.First(&diveGroup, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("dive group not found")
+		}
+		log.Printf("Error getting dive group: %v", result.Error)
+		return nil, errors.New("error getting dive group")
+	}
+	return &diveGroup, nil
+}

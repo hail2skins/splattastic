@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -51,6 +53,36 @@ func DiveGroupsIndex(c *gin.Context) {
 			"logged_in":  h.IsUserLoggedIn(c),
 			"divegroups": diveGroups,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
+
+// DiveGroupShow renders the dive group show page
+func DiveGroupShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing dive group id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	diveGroup, err := models.DiveGroupShow(id)
+	if err != nil {
+		log.Printf("Error getting dive group: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"divegroups/show.html",
+		gin.H{
+			"title":     "Dive Group",
+			"header":    "Dive Group",
+			"logged_in": h.IsUserLoggedIn(c),
+			"divegroup": diveGroup,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
 }
