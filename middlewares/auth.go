@@ -28,7 +28,7 @@ func AuthenticateUser() gin.HandlerFunc {
 		}
 
 		// Check if user is an admin
-		isAdmin := user != nil && user.Admin
+		isAdmin := user != nil && user.Admin != nil && *user.Admin
 
 		// If user was found, set user_id, email, and isAdmin in the gin.Context
 		if userPresent {

@@ -57,6 +57,10 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.POST("/divegroups/:id", controllers.DiveGroupUpdate)
 		admin.DELETE("/divegroups/:id", controllers.DiveGroupDelete)
 
+		// Dives
+
+		admin.GET("/dives/new", controllers.DiveNew)
+
 	}
 
 }
