@@ -1,6 +1,12 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"errors"
+	"log"
+
+	db "github.com/hail2skins/splattastic/database"
+	"gorm.io/gorm"
+)
 
 // Dive struct stiches together the dive group, dive type, board type and board height.
 // A dive is essentially the following combination of the above:
@@ -19,4 +25,46 @@ type Dive struct {
 	BoardType     BoardType   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"board_type"`
 	BoardHeightID uint64      `gorm:"not null" json:"boardheight_id"`
 	BoardHeight   BoardHeight `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"board_height"`
+}
+
+// DiveCreate creates a new dive
+// Need to have DiveType, DiveGroup, BoardType and BoardHeight
+func DiveCreate(name string, number int, difficulty float32, divetypeID uint64, divegroupID uint64, boardtypeID uint64, boardheightID uint64) (*Dive, error) {
+	// Check if the associated records exist
+	_, err := DiveTypeShow(divetypeID)
+	if err != nil {
+		log.Printf("Error getting divetype by id: %v", err)
+		return nil, errors.New("Error getting divetype by id")
+	}
+	_, err = DiveGroupShow(divegroupID)
+	if err != nil {
+		log.Printf("Error getting divegroup by id: %v", err)
+		return nil, errors.New("Error getting divegroup by id")
+	}
+	_, err = BoardTypeShow(boardtypeID)
+	if err != nil {
+		log.Printf("Error getting boardtype by id: %v", err)
+		return nil, errors.New("Error getting boardtype by id")
+	}
+	_, err = BoardHeightShow(boardheightID)
+	if err != nil {
+		log.Printf("Error getting boardheight by id: %v", err)
+		return nil, errors.New("Error getting boardheight by id")
+	}
+
+	dive := &Dive{
+		Name:          name,
+		Number:        number,
+		Difficulty:    difficulty,
+		DiveTypeID:    divetypeID,
+		DiveGroupID:   divegroupID,
+		BoardTypeID:   boardtypeID,
+		BoardHeightID: boardheightID,
+	}
+	result := db.Database.Create(dive)
+	if result.Error != nil {
+		log.Printf("Error creating dive: %v", result.Error)
+		return nil, result.Error
+	}
+	return dive, nil
 }
