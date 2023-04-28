@@ -91,3 +91,55 @@ func DiveShow(id uint64) (*Dive, error) {
 	}
 	return dive, nil
 }
+
+// DiveUpdate updates a dive
+func (dive *Dive) Update(name string, number int, difficulty float32, divetypeID uint64, divegroupID uint64, boardtypeID uint64, boardheightID uint64) error {
+	// Check if the associated records exist
+	_, err := DiveTypeShow(divetypeID)
+	if err != nil {
+		log.Printf("Error getting divetype by id: %v", err)
+		return errors.New("Error getting divetype by id")
+	}
+	_, err = DiveGroupShow(divegroupID)
+	if err != nil {
+		log.Printf("Error getting divegroup by id: %v", err)
+		return errors.New("Error getting divegroup by id")
+	}
+
+	_, err = BoardTypeShow(boardtypeID)
+	if err != nil {
+		log.Printf("Error getting boardtype by id: %v", err)
+		return errors.New("Error getting boardtype by id")
+	}
+	_, err = BoardHeightShow(boardheightID)
+	if err != nil {
+		log.Printf("Error getting boardheight by id: %v", err)
+		return errors.New("Error getting boardheight by id")
+	}
+
+	// Update dive fields
+	dive.Name = name
+	dive.Number = number
+	dive.Difficulty = difficulty
+	dive.DiveTypeID = divetypeID
+	dive.DiveGroupID = divegroupID
+	dive.BoardTypeID = boardtypeID
+	dive.BoardHeightID = boardheightID
+
+	// Save updated dive to the database
+	err = db.Database.Model(&dive).Updates(Dive{
+		Name:          name,
+		Number:        number,
+		Difficulty:    difficulty,
+		DiveTypeID:    divetypeID,
+		DiveGroupID:   divegroupID,
+		BoardTypeID:   boardtypeID,
+		BoardHeightID: boardheightID,
+	}).Error
+	if err != nil {
+		log.Printf("Error updating dive: %v", err)
+		return errors.New("Error updating dive")
+	}
+
+	return nil
+}

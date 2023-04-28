@@ -1,7 +1,7 @@
 {{ define "partials/show_dive_main.html" }}
 {{ if or .logged_in .test_run }}
-<a class="btn btn-outline-primary" href="/admin/divetypes/edit/{{ .dive.ID }}" role="button">Edit</a>
-<a class="btn btn-outline-danger" href="/admin/divetypes/{{ .dive.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a>   
+<a class="btn btn-outline-primary" href="/admin/dives/edit/{{ .dive.ID }}" role="button">Edit</a>
+<a class="btn btn-outline-danger" href="/admin/dives/{{ .dive.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a>   
 {{ end }}
     <!-- Post Content-->
        <article class="mb-4">

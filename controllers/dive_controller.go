@@ -220,3 +220,81 @@ func DiveEdit(c *gin.Context) {
 		},
 	)
 }
+
+// DiveUpdate updates a dive
+func DiveUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		log.Printf("Error updating dive: name is empty")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid name"})
+		return
+	}
+	numberStr := c.PostForm("number")
+	number, err := strconv.Atoi(numberStr)
+	if err != nil {
+		log.Printf("Error converting number to int: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid number"})
+		return
+	}
+	difficultyStr := c.PostForm("difficulty")
+	difficulty, err := strconv.ParseFloat(difficultyStr, 32)
+	if err != nil {
+		log.Printf("Error converting difficulty to float32: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid difficulty"})
+		return
+	}
+
+	diveTypeIDStr := c.PostForm("divetype_id")
+	diveTypeID, err := strconv.ParseUint(diveTypeIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting divetype_id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid divetype_id"})
+		return
+	}
+
+	diveGroupIDStr := c.PostForm("divegroup_id")
+	diveGroupID, err := strconv.ParseUint(diveGroupIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting dive_group_id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid divegroup_id"})
+		return
+	}
+	boardTypeIDStr := c.PostForm("boardtype_id")
+	boardTypeID, err := strconv.ParseUint(boardTypeIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting board_type_id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid boardtype_id"})
+		return
+	}
+	boardHeightIDStr := c.PostForm("boardheight_id")
+	boardHeightID, err := strconv.ParseUint(boardHeightIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting board_height_id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid boardheight_id"})
+		return
+	}
+
+	dive, err := models.DiveShow(id)
+	if err != nil {
+		log.Printf("Error fetching dive: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	err = dive.Update(name, number, float32(difficulty), diveTypeID, diveGroupID, boardTypeID, boardHeightID)
+	if err != nil {
+		log.Printf("Error updating dive: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/dives")
+
+}

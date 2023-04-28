@@ -63,6 +63,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.POST("/dives", controllers.DiveCreate)
 		admin.GET("/dives/:id", controllers.DiveShow)
 		admin.GET("/dives/edit/:id", controllers.DiveEdit)
+		admin.POST("/dives/:id", controllers.DiveUpdate)
 
 	}
 
