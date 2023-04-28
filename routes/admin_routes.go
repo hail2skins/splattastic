@@ -38,6 +38,34 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/boardtypes/edit/:id", controllers.BoardTypeEdit)
 		admin.POST("/boardtypes/:id", controllers.BoardTypeUpdate)
 		admin.DELETE("/boardtypes/:id", controllers.BoardTypeDelete)
+
+		// Dive types
+		admin.GET("/divetypes", controllers.DiveTypesIndex)
+		admin.GET("/divetypes/new", controllers.DiveTypeNew)
+		admin.POST("/divetypes", controllers.DiveTypeCreate)
+		admin.GET("/divetypes/:id", controllers.DiveTypeShow)
+		admin.GET("/divetypes/edit/:id", controllers.DiveTypeEdit)
+		admin.POST("/divetypes/:id", controllers.DiveTypeUpdate)
+		admin.DELETE("/divetypes/:id", controllers.DiveTypeDelete)
+
+		// Dive groups
+		admin.GET("/divegroups", controllers.DiveGroupsIndex)
+		admin.GET("/divegroups/new", controllers.DiveGroupNew)
+		admin.POST("/divegroups", controllers.DiveGroupCreate)
+		admin.GET("/divegroups/:id", controllers.DiveGroupShow)
+		admin.GET("/divegroups/edit/:id", controllers.DiveGroupEdit)
+		admin.POST("/divegroups/:id", controllers.DiveGroupUpdate)
+		admin.DELETE("/divegroups/:id", controllers.DiveGroupDelete)
+
+		// Dives
+		admin.GET("/dives", controllers.DivesIndex)
+		admin.GET("/dives/new", controllers.DiveNew)
+		admin.POST("/dives", controllers.DiveCreate)
+		admin.GET("/dives/:id", controllers.DiveShow)
+		admin.GET("/dives/edit/:id", controllers.DiveEdit)
+		admin.POST("/dives/:id", controllers.DiveUpdate)
+		admin.DELETE("/dives/:id", controllers.DiveDelete)
+
 	}
 
 }

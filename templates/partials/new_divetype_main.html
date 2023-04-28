@@ -1,0 +1,23 @@
+{{ define "partials/new_divetype_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>{{ .header }}</h1>
+            <form action="/admin/divetypes" method="POST">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name">
+                  <div id="nameHelp" class="form-text">Diving Position (Straight/Free/Tuck/Pike) </div>
+                </div>
+                <div class="mb-3">
+                    <label for="letter" class="form-label">Letter</label>
+                    <input type="letter" class="form-control" id="letter" aria-describedby="letterHelp" name="letter">
+                    <div id="letterHelp" class="form-text">Diving Position Letter </div>
+                  </div>
+               
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>   
+        </div>
+    </div>
+</div>
+{{ end }}

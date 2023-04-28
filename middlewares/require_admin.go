@@ -18,6 +18,7 @@ func RequireAdmin() gin.HandlerFunc {
 
 		// Check if user is an admin
 		isAdmin, exists := c.Get("isAdmin")
+
 		if !exists {
 			// Handle error
 			c.AbortWithStatus(http.StatusInternalServerError)

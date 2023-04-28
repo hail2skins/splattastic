@@ -16,7 +16,7 @@ type User struct {
 	UserName   string   `gorm:"unique;not null" json:"username"`
 	FirstName  string   `gorm:"not null" json:"firstname"`
 	LastName   string   `gorm:"not null" json:"lastname"`
-	Admin      bool     `gorm:"default:false" json:"admin"`
+	Admin      *bool    `gorm:"default:false" json:"admin"`
 	UserTypeID uint64   `gorm:"not null" json:"usertype_id"`
 	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
 }
@@ -95,6 +95,7 @@ func UserFindByEmailAndPassword(email string, password string) (*User, error) {
 
 	match := helpers.CheckPasswordHash(password, user.Password)
 	if match {
+		//log.Printf("UserFindByEmailAndPassword: user = %v", user) // for debugging
 		return &user, nil
 	} else {
 		return nil, errors.New("Password does not match")

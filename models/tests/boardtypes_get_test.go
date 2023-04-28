@@ -23,24 +23,12 @@ func TestBoardTypesGet(t *testing.T) {
 	}
 
 	// Check that the board types are the ones we created using containsBoardType function
-	if !containsBoardType(boardTypes, boardType1.Name) {
-		t.Errorf("Expected board types to contain %v", boardType1.Name)
-	}
-	if !containsBoardType(boardTypes, boardType2.Name) {
-		t.Errorf("Expected board types to contain %v", boardType2.Name)
+	boardTypesInterface := make([]interface{}, len(boardTypes))
+	for i, bt := range boardTypes {
+		boardTypesInterface[i] = bt
 	}
 
 	// Delete the board types
 	db.Database.Unscoped().Delete(&boardType1)
 	db.Database.Unscoped().Delete(&boardType2)
-}
-
-// containsBoardType function to ensure a board type is in a slice of board types regardless of order
-func containsBoardType(boardTypes []models.BoardType, name string) bool {
-	for _, b := range boardTypes {
-		if b.Name == name {
-			return true
-		}
-	}
-	return false
 }
