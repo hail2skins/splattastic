@@ -80,3 +80,14 @@ func DivesGet() ([]*Dive, error) {
 	}
 	return dives, nil
 }
+
+// DiveShow gets a dive by id
+func DiveShow(id uint64) (*Dive, error) {
+	dive := &Dive{}
+	result := db.Database.Preload("DiveType").Preload("DiveGroup").Preload("BoardType").Preload("BoardHeight").First(&dive, id)
+	if result.Error != nil {
+		log.Printf("Error getting dive: %v", result.Error)
+		return nil, result.Error
+	}
+	return dive, nil
+}

@@ -131,3 +131,43 @@ func DivesIndex(c *gin.Context) {
 		},
 	)
 }
+
+// DiveShow renders the show page for a dive
+// Requires: DiveGet, DiveGroupGet, DiveTypeGet, BoardTypeGet, BoardHeightGet
+func DiveShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	dive, err := models.DiveShow(id)
+	if err != nil {
+		log.Printf("Error fetching dive: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	diveGroup, _ := models.DiveGroupShow(dive.DiveGroupID)
+	diveType, _ := models.DiveTypeShow(dive.DiveTypeID)
+	boardType, _ := models.BoardTypeShow(dive.BoardTypeID)
+	boardHeight, _ := models.BoardHeightShow(dive.BoardHeightID)
+
+	c.HTML(
+		http.StatusOK,
+		"dives/show.html",
+		gin.H{
+			"title":       "Dive",
+			"header":      "Dive",
+			"logged_in":   h.IsUserLoggedIn(c),
+			"dive":        dive,
+			"divegroup":   diveGroup,
+			"divetype":    diveType,
+			"boardtype":   boardType,
+			"boardheight": boardHeight,
+			"test_run":    os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
