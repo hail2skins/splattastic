@@ -42,3 +42,17 @@ func EventTypesGet() ([]EventType, error) {
 	}
 	return eventTypes, nil
 }
+
+// EventTypeShow is a function which will get a single EventType
+func EventTypeShow(id uint64) (*EventType, error) {
+	var eventType EventType
+	result := db.Database.First(&eventType, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("event type not found")
+		}
+		log.Printf("Error getting event type: %v", result.Error)
+		return nil, errors.New("error getting event type")
+	}
+	return &eventType, nil
+}

@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -51,6 +53,36 @@ func EventTypesIndex(c *gin.Context) {
 			"logged_in":  h.IsUserLoggedIn(c),
 			"eventtypes": eventTypes,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
+
+// EventTypeShow is the controller for the event type show page
+func EventTypeShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	eventType, err := models.EventTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting event type: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"eventtypes/show.html",
+		gin.H{
+			"title":     "Event Type",
+			"header":    "Event Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"eventtype": eventType,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
 }
