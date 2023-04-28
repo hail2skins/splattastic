@@ -14,8 +14,8 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestDiveGroupEdit is the test for the DiveGroupEdit controller
-func TestDiveGroupEdit(t *testing.T) {
+// TestEventTypeEdit is the controller for the event type edit page
+func TestEventTypeEdit(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
@@ -24,22 +24,27 @@ func TestDiveGroupEdit(t *testing.T) {
 	os.Setenv("TEST_RUN", "true")
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
-	// Create a new dive group
-	diveGroup, _ := models.DiveGroupCreate("TestDiveGroup")
-
-	// Set up the router
-	r := gin.Default()
-	r.LoadHTMLGlob("../../templates/**/**")
-	r.GET("/admin/divegroups/edit/:id", controllers.DiveGroupEdit)
-
-	// Set up the request
-	req, err := http.NewRequest("GET", "/admin/divegroups/edit/"+helpers.UintToString(diveGroup.ID), nil)
+	// Create an event type
+	eventType, err := models.EventTypeCreate("TestEventType")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Set up the response recorder
+	// Create a gin router with the routes we need
+	r := gin.Default()
+	r.LoadHTMLGlob("../../templates/**/**")
+	r.GET("/admin/eventtypes/edit/:id", controllers.EventTypeEdit)
+
+	// Create a new request
+	req, err := http.NewRequest("GET", "/admin/eventtypes/edit/"+helpers.UintToString(eventType.ID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a response recorder so we can inspect the response
 	rr := httptest.NewRecorder()
+
+	// Perform the request
 	r.ServeHTTP(rr, req)
 
 	// Check the status code
@@ -47,13 +52,11 @@ func TestDiveGroupEdit(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	// Check the response body
-	expected := "Edit Dive Group"
-	if !strings.Contains(rr.Body.String(), expected) {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	// Check if the event type is in the response
+	if !strings.Contains(rr.Body.String(), eventType.Name) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), eventType.Name)
 	}
 
 	// Cleanup
-	db.Database.Unscoped().Delete(&diveGroup)
-
+	db.Database.Unscoped().Delete(&eventType)
 }

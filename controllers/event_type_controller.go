@@ -86,3 +86,33 @@ func EventTypeShow(c *gin.Context) {
 		},
 	)
 }
+
+// EventTypeEdit is the controller for the event type edit page
+func EventTypeEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	eventType, err := models.EventTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting event type: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"eventtypes/edit.html",
+		gin.H{
+			"title":     "Edit Event Type",
+			"header":    "Edit Event Type",
+			"logged_in": h.IsUserLoggedIn(c),
+			"eventtype": eventType,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
