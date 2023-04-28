@@ -56,3 +56,14 @@ func EventTypeShow(id uint64) (*EventType, error) {
 	}
 	return &eventType, nil
 }
+
+// Update method updates a event type
+func (eventType *EventType) Update(name string) error {
+	eventType.Name = name
+	result := db.Database.Save(&eventType)
+	if result.Error != nil {
+		log.Printf("Error updating event type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

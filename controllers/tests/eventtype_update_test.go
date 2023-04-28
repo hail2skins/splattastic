@@ -15,8 +15,8 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestDiveGroupUpdate is a test for the DiveGroupUpdate function
-func TestDiveGroupUpdate(t *testing.T) {
+// TestEventTypeUpdate is a test for the EventTypeUpdate controller
+func TestEventTypeUpdate(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
@@ -25,26 +25,26 @@ func TestDiveGroupUpdate(t *testing.T) {
 	os.Setenv("TEST_RUN", "true")
 	defer os.Setenv("TEST_RUN", "")
 
-	// Create a new dive group
-	diveGroup, err := models.DiveGroupCreate("TestDiveGroup")
+	// Create a new event type
+	eventType, err := models.EventTypeCreate("TestEventType")
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// Create a post request with form data
-	data := url.Values{}
-	data.Set("name", "UpdatedTestDiveGroup")
-	req, err := http.NewRequest("POST", "/admin/divegroups/"+helpers.UintToString(diveGroup.ID), strings.NewReader(data.Encode()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
-	r.GET("/admin/divegroups", controllers.DiveGroupsIndex)
-	r.POST("/admin/divegroups/:id", controllers.DiveGroupUpdate)
+	r.GET("/admin/eventtypes", controllers.EventTypesIndex)
+	r.POST("/admin/eventtypes/:id", controllers.EventTypeUpdate)
+
+	// Create a post request with form data
+	data := url.Values{}
+	data.Set("name", "UpdatedTestEventType")
+	req, err := http.NewRequest("POST", "/admin/eventtypes/"+helpers.UintToString(eventType.ID), strings.NewReader(data.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	// Create a response recorder so we can inspect the response
 	rr := httptest.NewRecorder()
@@ -57,18 +57,18 @@ func TestDiveGroupUpdate(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusFound)
 	}
 
-	// Get the updated dive group
-	updatedDiveGroup, err := models.DiveGroupShow(uint64(diveGroup.ID))
+	// Get the updated event type
+	updatedEventType, err := models.EventTypeShow(uint64(eventType.ID))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Check if the name was updated
-	expected := "UpdatedTestDiveGroup"
-	if updatedDiveGroup.Name != expected {
-		t.Errorf("expected updated name %v, got %v", expected, updatedDiveGroup.Name)
+	expected := "UpdatedTestEventType"
+	if updatedEventType.Name != expected {
+		t.Errorf("expected updated name %v, got %v", expected, updatedEventType.Name)
 	}
 
 	// Cleanup
-	db.Database.Unscoped().Delete(&updatedDiveGroup)
+	db.Database.Unscoped().Delete(&updatedEventType)
 }

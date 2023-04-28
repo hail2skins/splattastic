@@ -116,3 +116,36 @@ func EventTypeEdit(c *gin.Context) {
 		},
 	)
 }
+
+// EventTypeUpdate is the controller for updating an event type
+func EventTypeUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	eventType, err := models.EventTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting event type: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = eventType.Update(name)
+	if err != nil {
+		log.Printf("Error updating event type: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/eventtypes")
+}
