@@ -1,0 +1,93 @@
+{{ define "partials/edit_dive_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>{{ .header }}</h1>
+            <form action="/admin/dives/{{ .dive.ID }}" method="POST">
+                <div class="mb-3">
+                <label for="number" class="form-label">Number</label>
+                <input type="number" class="form-control" id="number" aria-describedby="numberHelp" name="number" value="{{ .dive.Number }}">
+                <div id="numberHelp" class="form-text">Dive Number </div>
+                </div>
+
+                <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name" value="{{ .dive.Name }}">
+                <div id="nameHelp" class="form-text">Dive Names </div>
+                </div>
+
+                <div class="mb-3">
+                <label for="difficulty" class="form-label">Difficulty</label>
+                <input type="number" step="0.1" class="form-control" id="difficulty" aria-describedby="difficultyHelp" name="difficulty" value="{{ .dive.Difficulty }}">
+                <div id="difficultyHelp" class="form-text">Degree of Difficulty </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label class="form-label">Board Type<span class="text-danger">*</span></label>
+                            {{ range $index, $boardtype := .boardtypes }}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="boardtype_id" id="board_type_{{ $boardtype.ID }}" value="{{ $boardtype.ID }}" required>
+                                    <label class="form-check-label" for="board_type_{{ $boardtype.ID }}">
+                                        {{ $boardtype.Name }}
+                                    </label>
+                                </div>
+                            {{ end }}
+                        </div>
+                    </div>
+                
+                    <div class="col">
+                        <div class="mb-3">
+                            <label class="form-label">Board Height<span class="text-danger">*</span></label>
+                            {{ range $index, $boardheight := .boardheights }}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="boardheight_id" id="board_height_{{ $boardheight.ID }}" value="{{ $boardheight.ID }}" required>
+                                    <label class="form-check-label" for="board_height_{{ $boardheight.ID }}">
+                                        {{ $boardheight.Height }} Meter(s)
+                                    </label>
+                                </div>
+                            {{ end }}
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="mb-3">
+                            <label class="form-label">Dive Type<span class="text-danger">*</span></label>
+                            {{ range $index, $divetype := .divetypes }}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="divetype_id" id="dive_type_{{ $divetype.ID }}" value="{{ $divetype.ID }}" required>
+                                    <label class="form-check-label" for="dive_type_{{ $divetype.ID }}">
+                                        {{ $divetype.Name }}
+                                    </label>
+                                </div>
+                            {{ end }}
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="mb-3">
+                            <label class="form-label">Dive Group<span class="text-danger">*</span></label>
+                            {{ range $index, $divegroup := .divegroups }}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="divegroup_id" id="dive_group_{{ $divegroup.ID }}" value="{{ $divegroup.ID }}" required>
+                                    <label class="form-check-label" for="dive_group_{{ $divegroup.ID }}">
+                                        {{ $divegroup.Name }}
+                                    </label>
+                                </div>
+                            {{ end }}
+                        </div>
+                    </div>
+
+
+
+                </div>
+                
+                
+               
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>   
+        </div>
+    </div>
+</div>
+{{ end }}

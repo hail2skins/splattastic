@@ -171,3 +171,52 @@ func DiveShow(c *gin.Context) {
 		},
 	)
 }
+
+// DiveEdit renders the edit page for a dive
+// Requires: DiveGet, DiveGroupGet, DiveTypeGet, BoardTypeGet, BoardHeightGet
+func DiveEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	dive, err := models.DiveShow(id)
+	if err != nil {
+		log.Printf("Error fetching dive: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	diveGroup, _ := models.DiveGroupShow(dive.DiveGroupID)
+	diveType, _ := models.DiveTypeShow(dive.DiveTypeID)
+	boardType, _ := models.BoardTypeShow(dive.BoardTypeID)
+	boardHeight, _ := models.BoardHeightShow(dive.BoardHeightID)
+
+	diveGroups, _ := models.DiveGroupsGet()
+	diveTypes, _ := models.DiveTypesGet()
+	boardTypes, _ := models.BoardTypesGet()
+	boardHeights, _ := models.GetBoardHeights()
+
+	c.HTML(
+		http.StatusOK,
+		"dives/edit.html",
+		gin.H{
+			"title":        "Edit Dive",
+			"header":       "Edit Dive",
+			"logged_in":    h.IsUserLoggedIn(c),
+			"dive":         dive,
+			"divegroup":    diveGroup,
+			"divetype":     diveType,
+			"boardtype":    boardType,
+			"boardheight":  boardHeight,
+			"divegroups":   diveGroups,
+			"divetypes":    diveTypes,
+			"boardtypes":   boardTypes,
+			"boardheights": boardHeights,
+			"test_run":     os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}
