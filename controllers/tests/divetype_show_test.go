@@ -25,7 +25,7 @@ func TestDiveTypeShow(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Create a dive type
-	diveType, err := models.DiveTypeCreate("TestDiveType")
+	diveType, err := models.DiveTypeCreate("TestDiveType", "Q")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,6 +55,9 @@ func TestDiveTypeShow(t *testing.T) {
 	// Check if the dive type is in the response
 	if !strings.Contains(rr.Body.String(), diveType.Name) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), diveType.Name)
+	}
+	if !strings.Contains(rr.Body.String(), diveType.Letter) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), diveType.Letter)
 	}
 
 	// Cleanup

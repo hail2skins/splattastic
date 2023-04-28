@@ -15,8 +15,8 @@ func TestDiveTypesGet(t *testing.T) {
 	db.Connect()
 
 	// Create two dive types
-	diveType1, _ := models.DiveTypeCreate("TestDiveType1")
-	diveType2, _ := models.DiveTypeCreate("TestDiveType2")
+	diveType1, _ := models.DiveTypeCreate("TestDiveType1", "Q")
+	diveType2, _ := models.DiveTypeCreate("TestDiveType2", "R")
 
 	// Get all dive types
 	diveTypes, err := models.DiveTypesGet()

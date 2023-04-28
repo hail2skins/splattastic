@@ -24,8 +24,8 @@ func TestDiveTypesIndex(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Create two dive types
-	diveType1, _ := models.DiveTypeCreate("TestDiveType1")
-	diveType2, _ := models.DiveTypeCreate("TestDiveType2")
+	diveType1, _ := models.DiveTypeCreate("TestDiveType1", "Q")
+	diveType2, _ := models.DiveTypeCreate("TestDiveType2", "R")
 
 	// Create a get request to /admin/divetypes
 	req, err := http.NewRequest("GET", "/admin/divetypes", nil)
@@ -55,6 +55,12 @@ func TestDiveTypesIndex(t *testing.T) {
 	}
 	if !strings.Contains(rr.Body.String(), diveType2.Name) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), diveType2.Name)
+	}
+	if !strings.Contains(rr.Body.String(), diveType1.Letter) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), diveType1.Letter)
+	}
+	if !strings.Contains(rr.Body.String(), diveType2.Letter) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), diveType2.Letter)
 	}
 
 	// Check if index page has the correct page text

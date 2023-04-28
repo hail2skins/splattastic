@@ -24,7 +24,7 @@ func TestDiveTypeDelete(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Create a new dive type
-	diveType, err := models.DiveTypeCreate("TestDiveType")
+	diveType, err := models.DiveTypeCreate("TestDiveType", "Q")
 	if err != nil {
 		t.Fatal(err)
 	}

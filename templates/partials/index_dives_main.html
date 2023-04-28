@@ -1,0 +1,50 @@
+{{ define "partials/index_dives_main.html" }}
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Group</th>
+                <th>Dive</th>
+                <th>Position</th>
+                <th>Difficulty</th>
+                <th>Height</th>
+                <th>Board</th>
+                {{ if or .logged_in .test_run }}
+                <th>Edit Dive</th>
+                <th>Delete Dive</th>
+                {{ end }}
+            </tr>
+        </thead>
+    
+    <tbody>
+      {{ $logged_in := .logged_in }} <!-- Store the logged_in value in a variable for the loop -->
+      {{ $test_run := .test_run }} <!-- Store the test_run value in a variable for the loop -->
+    
+      {{ range .dives }}
+        <tr>
+            <td>{{ .Number }}{{ .DiveType.Letter }}</td>
+            <td>{{ .DiveGroup.Name }}</td>
+            <td><a href="/admin/dives/{{ .ID }}">{{ .Name }}</td></a>
+            <td>{{ .DiveType.Name }}</td>
+            <td>{{ .Difficulty }}</td>
+            <td>{{ .BoardHeight.Height }}M</td>
+            <td>{{ .BoardType.Name }}</td>
+            {{ if or $logged_in $test_run }}
+            <td><a class="btn btn-outline-primary" href="/admin/dives/edit/{{ .ID }}" role="button">Edit Dive</a></td>
+            <td><a class="btn btn-outline-danger" href="/admin/dives/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Dive</a></td>
+            {{ end }}
+          </tr>
+      {{ else }}
+          <tr>
+          <td colspan="3">No Dive Types yet</td>
+        </tr>
+          
+      {{ end }}
+    
+    </table>
+
+
+
+{{ end }}

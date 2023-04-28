@@ -14,18 +14,19 @@ func TestDiveTypeCreate(t *testing.T) {
 	db.Connect()
 
 	// Create a board type
-	diveType, err := models.DiveTypeCreate("TestDiveType")
+	diveType, err := models.DiveTypeCreate("TestDiveType", "Q")
 	if err != nil {
 		t.Errorf("DiveTypeCreate returned an error: %v", err)
 	}
 
 	// Test that the dive type was created
-	if diveType.Name != "TestDiveType" {
-		t.Errorf("DiveTypeCreate returned an incorrect name: got %v want %v", diveType.Name, "Test Dive Type")
+	if diveType.Name != "TestDiveType" || diveType.Letter != "Q" {
+		t.Errorf("DiveTypeCreate returned an incorrect name: got %v want %v", diveType.Name, "TestDiveType")
+		t.Errorf("DiveTypeCreate returned an incorrect letter: got %v want %v", diveType.Letter, "Q")
 	}
 
 	// Test duplicate dive type name
-	dupDiveType, err := models.DiveTypeCreate("TestDiveType")
+	dupDiveType, err := models.DiveTypeCreate("TestDiveType", "Q")
 	if err == nil {
 		t.Errorf("Expected error when creating dive type with duplicate name")
 	}
@@ -34,7 +35,7 @@ func TestDiveTypeCreate(t *testing.T) {
 	}
 
 	// Test blank dive type name
-	blankDiveType, err := models.DiveTypeCreate("")
+	blankDiveType, err := models.DiveTypeCreate("", "")
 	if err == nil {
 		t.Errorf("Expected error when creating dive type with blank name")
 	}

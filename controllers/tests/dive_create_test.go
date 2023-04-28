@@ -40,7 +40,7 @@ func TestDiveCreate(t *testing.T) {
 	// Prepare form data for creating a new dive
 	data := url.Values{}
 	data.Set("name", "Test Dive")
-	data.Set("number", "101")
+	data.Set("number", "154")
 	data.Set("difficulty", "2.5")
 	data.Set("divetype_id", fmt.Sprintf("%d", dt1.ID))
 	data.Set("divegroup_id", fmt.Sprintf("%d", dg1.ID))

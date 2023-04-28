@@ -109,3 +109,25 @@ func DiveCreate(c *gin.Context) {
 	// Redirect to the newly created dive's show page
 	c.Redirect(http.StatusFound, fmt.Sprintf("/admin/dives/%d", dive.ID))
 }
+
+// DivesIndex renders the index page for dives
+func DivesIndex(c *gin.Context) {
+	dives, err := models.DivesGet()
+	if err != nil {
+		log.Printf("Error fetching dives: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"dives/index.html",
+		gin.H{
+			"title":     "Dives",
+			"header":    "Dives",
+			"logged_in": h.IsUserLoggedIn(c),
+			"dives":     dives,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+		},
+	)
+}

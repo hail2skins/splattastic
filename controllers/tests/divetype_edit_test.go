@@ -25,7 +25,7 @@ func TestDiveTypeEdit(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Create a new dive type
-	diveType, _ := models.DiveTypeCreate("TestDiveType")
+	diveType, _ := models.DiveTypeCreate("TestDiveType", "Q")
 
 	// Set up the router
 	r := gin.Default()

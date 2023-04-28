@@ -68,3 +68,15 @@ func DiveCreate(name string, number int, difficulty float32, divetypeID uint64, 
 	}
 	return dive, nil
 }
+
+// DivesGet gets all dives
+func DivesGet() ([]*Dive, error) {
+	dives := []*Dive{}
+	// Gorm preload of associated fields
+	result := db.Database.Preload("DiveType").Preload("DiveGroup").Preload("BoardType").Preload("BoardHeight").Find(&dives)
+	if result.Error != nil {
+		log.Printf("Error getting dives: %v", result.Error)
+		return nil, result.Error
+	}
+	return dives, nil
+}

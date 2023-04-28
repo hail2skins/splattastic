@@ -28,11 +28,12 @@ func DiveTypeNew(c *gin.Context) {
 // DiveTypeCreate creates a new dive type
 func DiveTypeCreate(c *gin.Context) {
 	name := c.PostForm("name")
+	letter := c.PostForm("letter")
 	if name == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	models.DiveTypeCreate(name)
+	models.DiveTypeCreate(name, letter)
 	c.Redirect(http.StatusFound, "/admin/divetypes")
 }
 
@@ -40,6 +41,7 @@ func DiveTypeCreate(c *gin.Context) {
 func DiveTypesIndex(c *gin.Context) {
 	diveTypes, err := models.DiveTypesGet()
 	if err != nil {
+		log.Printf("Error fetching dive types: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -128,6 +130,7 @@ func DiveTypeUpdate(c *gin.Context) {
 	}
 
 	name := c.PostForm("name")
+	letter := c.PostForm("letter")
 	if name == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -140,7 +143,7 @@ func DiveTypeUpdate(c *gin.Context) {
 		return
 	}
 
-	err = divetype.Update(name)
+	err = divetype.Update(name, letter)
 	if err != nil {
 		log.Printf("Error updating dive type: %s", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)

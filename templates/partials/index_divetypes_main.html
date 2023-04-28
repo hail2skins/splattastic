@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>Dive Types</th>
+                <th>Letter</th>
                 {{ if or .logged_in .test_run }}
                 <th>Edit Type</th>
                 <th>Delete Type</th>
@@ -19,6 +20,7 @@
       {{ range .divetypes }}
         <tr>
           <td><a href="/admin/divetypes/{{ .ID }}">{{ .Name }}</td></a>
+          <td>{{ .Letter }}</td>
             {{ if or $logged_in $test_run }}
               <td><a class="btn btn-outline-primary" href="/admin/divetypes/edit/{{ .ID }}" role="button">Edit Type</a></td>
               <td><a class="btn btn-outline-danger" href="/admin/divetypes/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Type</a></td>

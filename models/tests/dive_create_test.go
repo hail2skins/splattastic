@@ -19,7 +19,7 @@ func TestDiveCreate(t *testing.T) {
 
 	// Use the test data to create a new dive
 	name := "Test Dive"
-	number := 101
+	number := 154
 	difficulty := float32(2.5)
 	divetypeID := dt1.ID
 	divegroupID := dg1.ID

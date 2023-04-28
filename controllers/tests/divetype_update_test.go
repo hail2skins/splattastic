@@ -26,7 +26,7 @@ func TestDiveTypeUpdate(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "")
 
 	// Create a new dive type
-	diveType, err := models.DiveTypeCreate("TestDiveType")
+	diveType, err := models.DiveTypeCreate("TestDiveType", "Q")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,6 +34,7 @@ func TestDiveTypeUpdate(t *testing.T) {
 	// Create a post request with form data
 	data := url.Values{}
 	data.Set("name", "UpdatedTestDiveType")
+	data.Set("letter", "R")
 	req, err := http.NewRequest("POST", "/admin/divetypes/"+helpers.UintToString(diveType.ID), strings.NewReader(data.Encode()))
 	if err != nil {
 		t.Fatal(err)
@@ -67,6 +68,9 @@ func TestDiveTypeUpdate(t *testing.T) {
 	expected := "UpdatedTestDiveType"
 	if updatedDiveType.Name != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", updatedDiveType.Name, expected)
+	}
+	if updatedDiveType.Letter != "R" {
+		t.Errorf("handler returned unexpected body: got %v want %v", updatedDiveType.Letter, "R")
 	}
 
 	// Cleanup

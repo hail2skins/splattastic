@@ -11,16 +11,17 @@ import (
 // DiveType is a model for the dive_types table
 type DiveType struct {
 	gorm.Model
-	Name string `gorm:"not null;unique" json:"name"` // Position of the dive (Straight/Pike/Tuck/Free)
+	Name   string `gorm:"not null;unique" json:"name"`   // Position of the dive (Straight/Pike/Tuck/Free)
+	Letter string `gorm:"not null;unique" json:"letter"` // Letter of the dive (A/B/C/D)
 }
 
 // DiveTypeCreate creates a new dive type
-func DiveTypeCreate(name string) (*DiveType, error) {
+func DiveTypeCreate(name string, letter string) (*DiveType, error) {
 	if name == "" {
 		return nil, errors.New("dive type name cannot be empty")
 	}
 
-	diveType := DiveType{Name: name}
+	diveType := DiveType{Name: name, Letter: letter}
 	result := db.Database.Create(&diveType)
 	if result.Error != nil {
 		log.Printf("Error creating dive type: %v", result.Error)
@@ -56,8 +57,9 @@ func DiveTypeShow(id uint64) (*DiveType, error) {
 }
 
 // Update method updates a dive type
-func (diveType *DiveType) Update(name string) error {
+func (diveType *DiveType) Update(name string, letter string) error {
 	diveType.Name = name
+	diveType.Letter = letter
 	result := db.Database.Save(diveType)
 	if result.Error != nil {
 		log.Printf("Error updating dive type: %v", result.Error)

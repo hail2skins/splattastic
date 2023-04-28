@@ -27,6 +27,7 @@ func TestDiveTypeCreate(t *testing.T) {
 	// Create a post request with form data
 	data := url.Values{}
 	data.Set("name", "TestDiveType")
+	data.Set("letter", "Q")
 	req, err := http.NewRequest("POST", "/admin/divetypes", strings.NewReader(data.Encode()))
 	if err != nil {
 		t.Fatal(err)
@@ -59,6 +60,9 @@ func TestDiveTypeCreate(t *testing.T) {
 	// Check if the dive type is created in the database
 	var createdDiveType models.DiveType
 	if err := db.Database.Where("name = ?", "TestDiveType").First(&createdDiveType).Error; err != nil {
+		t.Errorf("handler did not create the dive type in the database: %v", err)
+	}
+	if err := db.Database.Where("letter = ?", "Q").First(&createdDiveType).Error; err != nil {
 		t.Errorf("handler did not create the dive type in the database: %v", err)
 	}
 
