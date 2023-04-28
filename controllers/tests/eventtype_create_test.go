@@ -27,7 +27,7 @@ func TestEventTypeCreate(t *testing.T) {
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
-	r.GET("/admin", controllers.AdminDashboard)
+	r.GET("/admin/eventtypes", controllers.EventTypesIndex)
 	r.POST("/admin/eventtypes", controllers.EventTypeCreate)
 
 	// Create a post request with form data
@@ -51,7 +51,7 @@ func TestEventTypeCreate(t *testing.T) {
 	}
 
 	// Check the redirect location
-	expected := "/admin"
+	expected := "/admin/eventtypes"
 	if location := rr.Header().Get("Location"); location != expected {
 		t.Errorf("handler returned unexpected redirect location: got %v want %v", location, expected)
 	}

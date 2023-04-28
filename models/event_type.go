@@ -31,3 +31,14 @@ func EventTypeCreate(name string) (*EventType, error) {
 	log.Printf("Event type created: %v", eventType)
 	return &eventType, nil
 }
+
+// EventTypesGet is a function which will get all EventTypes
+func EventTypesGet() ([]EventType, error) {
+	var eventTypes []EventType
+	result := db.Database.Find(&eventTypes)
+	if result.Error != nil {
+		log.Printf("Error getting event types: %v", result.Error)
+		return nil, result.Error
+	}
+	return eventTypes, nil
+}

@@ -31,5 +31,26 @@ func EventTypeCreate(c *gin.Context) {
 		return
 	}
 	models.EventTypeCreate(name)
-	c.Redirect(http.StatusFound, "/admin")
+	c.Redirect(http.StatusFound, "/admin/eventtypes")
+}
+
+// EventTypesIndex is the controller for the event types index page
+func EventTypesIndex(c *gin.Context) {
+	eventTypes, err := models.EventTypesGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"eventtypes/index.html",
+		gin.H{
+			"title":      "Event Types",
+			"header":     "Event Types",
+			"logged_in":  h.IsUserLoggedIn(c),
+			"eventtypes": eventTypes,
+			"test_run":   os.Getenv("TEST_RUN") == "true",
+		},
+	)
 }
