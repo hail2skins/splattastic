@@ -298,3 +298,23 @@ func DiveUpdate(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/admin/dives")
 
 }
+
+// DiveDelete deletes a dive
+func DiveDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting id to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	err = models.DiveDelete(id)
+	if err != nil {
+		log.Printf("Error deleting dive: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/dives")
+}

@@ -64,6 +64,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/dives/:id", controllers.DiveShow)
 		admin.GET("/dives/edit/:id", controllers.DiveEdit)
 		admin.POST("/dives/:id", controllers.DiveUpdate)
+		admin.DELETE("/dives/:id", controllers.DiveDelete)
 
 	}
 

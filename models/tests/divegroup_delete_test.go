@@ -19,10 +19,16 @@ func TestDiveGroupDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Verify the dive group was created
-	_, err = models.DiveGroupShow(uint64(diveGroup.ID))
+	// Delete the dive group
+	err = models.DiveGroupDelete(uint64(diveGroup.ID))
 	if err != nil {
-		t.Errorf("Dive group with ID %d not created", diveGroup.ID)
+		t.Fatal(err)
+	}
+
+	// Verify the dive group was deleted
+	_, err = models.DiveGroupShow(uint64(diveGroup.ID))
+	if err == nil {
+		t.Errorf("Dive group with ID %d not deleted", diveGroup.ID)
 	}
 
 	// Delete the dive group

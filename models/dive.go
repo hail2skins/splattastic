@@ -143,3 +143,14 @@ func (dive *Dive) Update(name string, number int, difficulty float32, divetypeID
 
 	return nil
 }
+
+// DiveDelete deletes a dive
+func DiveDelete(id uint64) error {
+	var dive Dive
+	result := db.Database.Delete(&dive, id)
+	if result.Error != nil {
+		log.Printf("Error deleting dive: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
