@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
+	"github.com/hail2skins/splattastic/models"
 )
 
 // EventTypeNew is the controller for the new event type page
@@ -20,4 +21,15 @@ func EventTypeNew(c *gin.Context) {
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 		},
 	)
+}
+
+// EventTypeCreate is the controller for creating a new event type
+func EventTypeCreate(c *gin.Context) {
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	models.EventTypeCreate(name)
+	c.Redirect(http.StatusFound, "/admin")
 }
