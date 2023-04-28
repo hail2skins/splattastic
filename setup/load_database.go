@@ -14,4 +14,5 @@ func LoadDatabase() {
 	db.Database.AutoMigrate(&models.DiveType{})
 	db.Database.AutoMigrate(&models.DiveGroup{})
 	db.Database.AutoMigrate(&models.Dive{})
+	db.Database.AutoMigrate(&models.EventType{})
 }
