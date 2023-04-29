@@ -3,7 +3,7 @@
     <div class="row gx-4 gx-lg-5 justify-content-center">
         <div class="col-md-10 col-lg-8 col-xl-7">
             <h1>Edit Profile</h1>
-            <form action="/user/edit/{{ .user.ID }}" method="POST">
+            <form action="/user/{{ .user.ID }}" method="POST">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" id="email" aria-describedby="emailHelp" name="email" value="{{ .user.Email }}" required>
@@ -12,7 +12,7 @@
                 
                 <div class="mb-3">
                     <label for="user_type" class="form-label">User Type<span class="text-danger">*</span></label>
-                    <select class="form-select" id="user_type" name="user_type" required>
+                    <select class="form-select" id="user_type_id" name="user_type_id" required>
                         <option value="">Select User Type</option>
                         {{ range $index, $usertype := .userTypes }}
                             <option value="{{ $usertype.ID }}">{{ $usertype.Name }}</option>

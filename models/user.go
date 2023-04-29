@@ -129,3 +129,34 @@ func UserShow(id uint64) (*User, error) {
 	}
 	return &user, nil
 }
+
+// Update method
+func (user *User) Update(email string, firstname string, lastname string, username string, usertypeID uint64) error {
+	_, err := UserTypeShow(usertypeID)
+	if err != nil {
+		log.Printf("Error finding usertype: %v", err)
+		return errors.New("Error finding usertype")
+	}
+
+	// Update user fields
+	user.Email = email
+	user.FirstName = firstname
+	user.LastName = lastname
+	user.UserName = username
+	user.UserTypeID = usertypeID
+
+	// Save updated user to the db
+	err = db.Database.Model(&user).Updates(User{
+		Email:      email,
+		FirstName:  firstname,
+		LastName:   lastname,
+		UserName:   username,
+		UserTypeID: usertypeID,
+	}).Error
+	if err != nil {
+		log.Printf("Error updating user: %v", err)
+		return errors.New("Error updating user")
+	}
+	return nil
+
+}

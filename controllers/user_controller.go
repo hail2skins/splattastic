@@ -102,3 +102,43 @@ func UserEdit(c *gin.Context) {
 		},
 	)
 }
+
+// UserUpdate updates a user
+func UserUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing user ID: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	email := c.PostForm("email")
+	firstName := c.PostForm("firstname")
+	lastName := c.PostForm("lastname")
+	username := c.PostForm("username")
+	userTypeIDStr := c.PostForm("user_type_id")
+	userTypeID, err := strconv.ParseUint(userTypeIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing user type ID: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user type ID"})
+		return
+	}
+
+	// Get the user
+	user, err := models.UserShow(id)
+	if err != nil {
+		log.Printf("Error getting user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update the user
+	err = user.Update(email, firstName, lastName, username, userTypeID)
+	if err != nil {
+		log.Printf("Error updating user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Redirect(http.StatusFound, "/user/"+idStr)
+}
