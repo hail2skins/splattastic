@@ -53,6 +53,9 @@ func serveApplication() {
 	adminRoutes := r.Group("/admin", middlewares.RequireAdmin())
 	routes.AdminRoutes(adminRoutes)
 
+	userRoutes := r.Group("/user")
+	routes.UserRoutes(userRoutes)
+
 	log.Println("Server started")
 	r.Run(":8080") // listen and serve on localhost:8080
 }

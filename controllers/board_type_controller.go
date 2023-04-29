@@ -21,6 +21,7 @@ func BoardTypeNew(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"header":    "New Board Type",
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -53,6 +54,7 @@ func BoardTypesIndex(c *gin.Context) {
 			"header":     "Board Types",
 			"boardtypes": boardtypes,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+			"user_id":    c.GetUint("user_id"),
 		},
 	)
 }
@@ -82,6 +84,7 @@ func BoardTypeShow(c *gin.Context) {
 			"header":    "Board Type",
 			"boardtype": boardtype,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -111,6 +114,7 @@ func BoardTypeEdit(c *gin.Context) {
 			"header":    "Edit Board Type",
 			"boardtype": boardtype,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }

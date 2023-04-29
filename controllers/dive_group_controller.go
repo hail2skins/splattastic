@@ -21,6 +21,7 @@ func DiveGroupNew(c *gin.Context) {
 			"header":    "New Dive Group",
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -53,6 +54,7 @@ func DiveGroupsIndex(c *gin.Context) {
 			"logged_in":  h.IsUserLoggedIn(c),
 			"divegroups": diveGroups,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+			"user_id":    c.GetUint("user_id"),
 		},
 	)
 }
@@ -83,6 +85,7 @@ func DiveGroupShow(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"divegroup": diveGroup,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -113,6 +116,7 @@ func DiveGroupEdit(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"divegroup": diveGroup,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }

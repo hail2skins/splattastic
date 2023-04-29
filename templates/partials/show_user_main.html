@@ -1,0 +1,41 @@
+{{ define "partials/show_user_main.html" }}
+{{ if or .current_user .test_run }}
+<a class="btn btn-outline-primary" href="/user/edit/{{ .user.ID }}" role="button">Edit</a>
+
+{{ end }}
+    <!-- Post Content-->
+       <article class="mb-4">
+        <div class="container px-4 px-lg-5">
+            <div class="card-group">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">User Details</h5>
+                    <p class="card-text">Username: {{ .user.UserName }}</p>
+                    <p class="card-text">Name: {{ .user.FirstName }} {{ .user.LastName }}</p>
+                    <p class="card-text">Type: {{ .user.UserType.Name }}</p>
+                    <p class="card-text">Team: <a href="#" class="card-link">Team</a></p>
+                   </div>
+                   <div class="card-footer">Something</div>
+                </div>
+                <div class="card">
+                  
+                  <div class="card-body">
+                    <h5 class="card-title">Recent Events</h5>
+                    <p class="card-text">Something here</p>
+                    
+                  </div>
+                  <div class="card-footer"><a href="#" class="card-link">Events</a></div>
+                </div>
+                <div class="card">
+                  
+                  <div class="card-body">
+                    <h5 class="card-title">Recent Dives</h5>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                  </div>
+                  <div class="card-footer"><a href="#" class="card-link">Dives</a></div>
+                </div>
+              </div>
+        </div>
+    </article>
+{{ end }}

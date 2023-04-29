@@ -16,5 +16,6 @@ func AdminDashboard(c *gin.Context) {
 			"title":     "Admin Dashboard",
 			"logged_in": h.IsUserLoggedIn(c),
 			"header":    "Dashboard",
+			"user_id":   c.GetUint("user_id"),
 		})
 }

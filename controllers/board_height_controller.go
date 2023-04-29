@@ -22,6 +22,7 @@ func BoardHeightNew(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"header":    "New Board Height",
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -66,6 +67,7 @@ func BoardHeightsIndex(c *gin.Context) {
 			"header":       "Board Heights",
 			"boardheights": boardheights,
 			"test_run":     os.Getenv("TEST_RUN") == "true",
+			"user_id":      c.GetUint("user_id"),
 		},
 	)
 }
@@ -93,6 +95,7 @@ func BoardHeightShow(c *gin.Context) {
 			"header":      "Board Height",
 			"boardheight": boardheight,
 			"test_run":    os.Getenv("TEST_RUN") == "true",
+			"user_id":     c.GetUint("user_id"),
 		},
 	)
 }
@@ -120,6 +123,7 @@ func BoardHeightEdit(c *gin.Context) {
 			"header":      "Edit Board Height",
 			"boardheight": boardheight,
 			"test_run":    os.Getenv("TEST_RUN") == "true",
+			"user_id":     c.GetUint("user_id"),
 		},
 	)
 

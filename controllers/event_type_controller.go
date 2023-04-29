@@ -21,6 +21,7 @@ func EventTypeNew(c *gin.Context) {
 			"header":    "New Event Type",
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -53,6 +54,7 @@ func EventTypesIndex(c *gin.Context) {
 			"logged_in":  h.IsUserLoggedIn(c),
 			"eventtypes": eventTypes,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
+			"user_id":    c.GetUint("user_id"),
 		},
 	)
 }
@@ -83,6 +85,7 @@ func EventTypeShow(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"eventtype": eventType,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -113,6 +116,7 @@ func EventTypeEdit(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"eventtype": eventType,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }

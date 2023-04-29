@@ -50,7 +50,7 @@ func GetUserByEmail(email string) (*User, error) {
 }
 
 // UserCreate creates a new user
-func UserCreate(email string, password string, username string, firstname string, lastname string, usertypeName string) (*User, error) {
+func UserCreate(email string, password string, firstname string, lastname string, username string, usertypeName string) (*User, error) {
 	hshPasswd, err := helpers.HashPassword(password)
 	if err != nil {
 		log.Printf("Error hashing password: %v", err)
@@ -66,9 +66,9 @@ func UserCreate(email string, password string, username string, firstname string
 	entry := User{
 		Email:     email,
 		Password:  hshPasswd,
-		UserName:  username,
 		FirstName: firstname,
 		LastName:  lastname,
+		UserName:  username,
 		UserType:  usertype,
 	}
 
@@ -106,6 +106,20 @@ func UserFindByEmailAndPassword(email string, password string) (*User, error) {
 func UserFind(id uint64) (*User, error) {
 	var user User
 	result := db.Database.First(&user, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("User not found")
+		}
+		log.Printf("Error getting user by id: %v", result.Error)
+		return nil, errors.New("Error finding user")
+	}
+	return &user, nil
+}
+
+// UserShow shows a user by id and associated UserType for a profile page
+func UserShow(id uint64) (*User, error) {
+	var user User
+	result := db.Database.Preload("UserType").First(&user, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("User not found")

@@ -52,6 +52,7 @@ func DiveNew(c *gin.Context) {
 			"boardtypes":   boardTypes,
 			"boardheights": boardHeights,
 			"test_run":     os.Getenv("TEST_RUN") == "true",
+			"user_id":      c.GetUint("user_id"),
 		},
 	)
 }
@@ -128,6 +129,7 @@ func DivesIndex(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"dives":     dives,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -168,6 +170,7 @@ func DiveShow(c *gin.Context) {
 			"boardtype":   boardType,
 			"boardheight": boardHeight,
 			"test_run":    os.Getenv("TEST_RUN") == "true",
+			"user_id":     c.GetUint("user_id"),
 		},
 	)
 }
@@ -217,6 +220,7 @@ func DiveEdit(c *gin.Context) {
 			"boardtypes":   boardTypes,
 			"boardheights": boardHeights,
 			"test_run":     os.Getenv("TEST_RUN") == "true",
+			"user_id":      c.GetUint("user_id"),
 		},
 	)
 }

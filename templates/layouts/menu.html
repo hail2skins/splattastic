@@ -13,6 +13,7 @@
                         <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
                         <li class="nav-item"><a class="nav-link" href="contact.html">PLACEHOLDER</a></li>
                         {{ if .logged_in }}
+                        <li class="nav-item"><a class="nav-link" href="/user/{{ .user_id }}">Profile</a></li>
                         <form action="/logout" method="post">
                             <li class="nav-item"><button type="submit" class="btn btn-danger nav-link px-lg-3 py-3 py-lg-4">Logout</button></li>
                         </form>

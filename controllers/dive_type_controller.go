@@ -21,6 +21,7 @@ func DiveTypeNew(c *gin.Context) {
 			"header":    "New Dive Type",
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -55,6 +56,7 @@ func DiveTypesIndex(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"divetypes": diveTypes,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -85,6 +87,7 @@ func DiveTypeShow(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"divetype":  divetype,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -115,6 +118,7 @@ func DiveTypeEdit(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"divetype":  divetype,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }

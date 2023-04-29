@@ -22,6 +22,7 @@ func Home(c *gin.Context) {
 			"title":     "Splattastic",
 			"logged_in": h.IsUserLoggedIn(c),
 			"alert":     alert,
+			"user_id":   c.GetUint("user_id"),
 		})
 }
 
@@ -32,5 +33,6 @@ func About(c *gin.Context) {
 		gin.H{
 			"title":     "About",
 			"logged_in": h.IsUserLoggedIn(c),
+			"user_id":   c.GetUint("user_id"),
 		})
 }

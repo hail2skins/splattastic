@@ -20,6 +20,8 @@ func UserTypeNew(c *gin.Context) {
 			"title":     "New User Type",
 			"logged_in": h.IsUserLoggedIn(c),
 			"header":    "New User Type",
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -52,6 +54,7 @@ func UserTypeIndex(c *gin.Context) {
 			"usertypes": usertypes,
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 			"header":    "Listing User Types",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -79,6 +82,7 @@ func UserTypeShow(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 			"header":    "Showing User Type",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
@@ -106,6 +110,7 @@ func UserTypeEdit(c *gin.Context) {
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 			"header":    "Editing User Type",
+			"user_id":   c.GetUint("user_id"),
 		},
 	)
 }
