@@ -67,3 +67,14 @@ func (eventType *EventType) Update(name string) error {
 	}
 	return nil
 }
+
+// EventTypeDelete is a function which will delete a single EventType
+func EventTypeDelete(id uint64) error {
+	var eventType EventType
+	result := db.Database.Delete(&eventType, id)
+	if result.Error != nil {
+		log.Printf("Error deleting event type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

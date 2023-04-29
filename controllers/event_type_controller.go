@@ -149,3 +149,23 @@ func EventTypeUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/eventtypes")
 }
+
+// EventTypeDelete is the controller for deleting an event type
+func EventTypeDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.EventTypeDelete(id)
+	if err != nil {
+		log.Printf("Error deleting event type: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/eventtypes")
+}

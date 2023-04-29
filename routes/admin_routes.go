@@ -73,6 +73,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/eventtypes/:id", controllers.EventTypeShow)
 		admin.GET("/eventtypes/edit/:id", controllers.EventTypeEdit)
 		admin.POST("/eventtypes/:id", controllers.EventTypeUpdate)
+		admin.DELETE("/eventtypes/:id", controllers.EventTypeDelete)
 
 	}
 

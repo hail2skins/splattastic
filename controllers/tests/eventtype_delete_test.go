@@ -13,8 +13,8 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestDiveGroupDelete tests the DiveGroupDelete function
-func TestDiveGroupDelete(t *testing.T) {
+// TestEventTypeDelete is the controller for the event type delete page
+func TestEventTypeDelete(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
@@ -23,14 +23,8 @@ func TestDiveGroupDelete(t *testing.T) {
 	os.Setenv("TEST_RUN", "true")
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
-	// Create a new dive group
-	diveGroup, err := models.DiveGroupCreate("TestDiveGroup")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create a delete request
-	req, err := http.NewRequest(http.MethodDelete, "/admin/divegroups/"+helpers.UintToString(diveGroup.ID), nil)
+	// Create a new event type
+	eventType, err := models.EventTypeCreate("TestEventType")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +32,13 @@ func TestDiveGroupDelete(t *testing.T) {
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
-	r.DELETE("/admin/divegroups/:id", controllers.DiveGroupDelete)
+	r.DELETE("/admin/eventtypes/:id", controllers.EventTypeDelete)
+
+	// Create a delete request
+	req, err := http.NewRequest(http.MethodDelete, "/admin/eventtypes/"+helpers.UintToString(eventType.ID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Create a response recorder so we can inspect the response
 	rr := httptest.NewRecorder()
@@ -52,11 +52,11 @@ func TestDiveGroupDelete(t *testing.T) {
 	}
 
 	// Verify the event type was deleted
-	_, err = models.DiveGroupShow(uint64(diveGroup.ID))
+	_, err = models.EventTypeShow(uint64(eventType.ID))
 	if err == nil {
-		t.Errorf("Dive group with ID %d not deleted", diveGroup.ID)
+		t.Errorf("Event type with ID %d not deleted", eventType.ID)
 	}
 
-	// Teardown
-	db.Database.Unscoped().Delete(&diveGroup)
+	// Delete the event type
+	db.Database.Unscoped().Delete(&eventType)
 }
