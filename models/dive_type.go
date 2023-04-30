@@ -34,7 +34,7 @@ func DiveTypeCreate(name string, letter string) (*DiveType, error) {
 // DiveTypesGet gets all dive types
 func DiveTypesGet() ([]DiveType, error) {
 	var diveTypes []DiveType
-	result := db.Database.Find(&diveTypes)
+	result := db.Database.Order("letter ASC").Find(&diveTypes)
 	if result.Error != nil {
 		log.Printf("Error getting dive types: %v", result.Error)
 		return nil, result.Error

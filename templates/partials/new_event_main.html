@@ -1,0 +1,68 @@
+{{ define "partials/new_event_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>New Event</h1>
+            <form action="/user/{{ .user.ID }}/event" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name/Description of Event <span class="text-danger">*</span></label>
+                    <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name" required>
+                    <div id="nameHelp" class="form-text">Brief name/description of event</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="event_type" class="form-label">Event Type<span class="text-danger">*</span></label>
+                    <select class="form-select" id="event_type_id" name="event_type_id" required>
+                        <option value="">Select Event Type</option>
+                        {{ range $index, $eventType := .eventTypes }}
+                            <option value="{{ $eventType.ID }}">{{ $eventType.Name }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="against" class="form-label">Against</label>
+                            <input type="text" class="form-control" id="against" name="against">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="event_date" class="form-label">Event Date<span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="event_date" name="event_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Event Location</label>
+                    <input type="text" class="form-control" id="location" name="location">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Dives<span class="text-danger">*</span></label>
+                    <div class="row">
+                        {{ range $index, $dive := .dives }}
+                            {{ if eq (mod $index 4) 0 }}
+                                {{ if ne $index 0 }}</div>{{ end }}
+                                <div class="col-md-4">
+                            {{ end }}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="dive_id" id="dive_{{ $dive.ID }}" value="{{ $dive.ID }}" required>
+                                <label class="form-check-label" for="dive_{{ $dive.ID }}">
+                                    {{ $dive.Number }}{{ $dive.DiveType.Letter}} {{ shorten $dive.DiveGroup.Name}} {{ shorten $dive.Name }} {{ $dive.BoardHeight.Height }}M {{ shorten $dive.BoardType.Name }} 
+                                </label>
+                            </div>
+                        {{ end }}
+                        </div>
+                    </div>
+                </div>
+                
+                
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+        </div>
+    </div>
+</div>
+
+{{ end }}

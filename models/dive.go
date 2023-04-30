@@ -15,7 +15,7 @@ import (
 type Dive struct {
 	gorm.Model
 	Name          string      `gorm:"not null" json:"name"`
-	Number        int         `gorm:"unique;not null" json:"number"`
+	Number        int         `gorm:"not null" json:"number"`
 	Difficulty    float32     `gorm:"not null" json:"difficulty"`
 	DiveTypeID    uint64      `gorm:"not null" json:"divetype_id"`
 	DiveType      DiveType    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"dive_type"`
@@ -70,14 +70,30 @@ func DiveCreate(name string, number int, difficulty float32, divetypeID uint64, 
 }
 
 // DivesGet gets all dives
+// DivesGet gets all dives
 func DivesGet() ([]*Dive, error) {
 	dives := []*Dive{}
-	// Gorm preload of associated fields
-	result := db.Database.Preload("DiveType").Preload("DiveGroup").Preload("BoardType").Preload("BoardHeight").Find(&dives)
+
+	// Raw SQL query to get dives ordered by number and letter
+	query := `SELECT dives.* FROM dives 
+	INNER JOIN dive_types ON dives.dive_type_id = dive_types.id
+	ORDER BY dives.number, dive_types.letter`
+
+	result := db.Database.Raw(query).Scan(&dives)
 	if result.Error != nil {
 		log.Printf("Error getting dives: %v", result.Error)
 		return nil, result.Error
 	}
+
+	// Because we are using a raw query, we need to manually preload the associations
+	// as the Gorm .preload() method does not work with raw queries
+	for _, dive := range dives {
+		db.Database.Model(dive).Association("DiveType").Find(&dive.DiveType)
+		db.Database.Model(dive).Association("DiveGroup").Find(&dive.DiveGroup)
+		db.Database.Model(dive).Association("BoardType").Find(&dive.BoardType)
+		db.Database.Model(dive).Association("BoardHeight").Find(&dive.BoardHeight)
+	}
+
 	return dives, nil
 }
 
