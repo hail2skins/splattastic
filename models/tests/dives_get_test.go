@@ -19,7 +19,7 @@ func TestDivesGet(t *testing.T) {
 
 	// Use the test data to create a new dive
 	name := "Test Dive"
-	number := 101
+	number := 154
 	difficulty := float32(2.5)
 	divetypeID := dt1.ID
 	divegroupID := dg1.ID
@@ -28,7 +28,7 @@ func TestDivesGet(t *testing.T) {
 
 	// Use this test data to create a second dive
 	name2 := "Test Dive 2"
-	number2 := 102
+	number2 := 155
 	difficulty2 := float32(3.5)
 	divetypeID2 := dt2.ID
 	divegroupID2 := dg2.ID

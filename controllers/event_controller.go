@@ -1,9 +1,13 @@
 package controllers
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	ch "github.com/hail2skins/splattastic/controllers/helpers"
@@ -54,4 +58,56 @@ func EventNew(c *gin.Context) {
 			"user":       user,
 		},
 	)
+}
+
+// EventCreate handles the creation of a new event
+// Requires Dives/Users/EventTypes
+func EventCreate(c *gin.Context) {
+	// Parse the form data
+	name := c.PostForm("name")
+	eventTypeIDStr := c.PostForm("event_type_id")
+	eventTypeID, err := strconv.ParseUint(eventTypeIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event type ID to uint: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event type ID"})
+		return
+	}
+	against := c.PostForm("against")
+	dateStr := c.PostForm("date")
+	date, err := time.Parse("01/02/2006", dateStr)
+	if err != nil {
+		log.Printf("Error parsing date: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+		return
+	}
+	location := c.PostForm("location")
+
+	// Get the user ID from JWT claims
+	userID, _ := strconv.ParseUint(c.MustGet("userID").(string), 10, 64)
+
+	// Handle dives
+	diveIDsStr := c.PostForm("dive_ids")
+	diveIDStrs := strings.Split(diveIDsStr, ",")
+	diveIDs := make([]uint64, len(diveIDStrs))
+	for i, diveIDStr := range diveIDStrs {
+		diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
+		if err != nil {
+			log.Printf("Error converting dive ID to uint: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid dive ID"})
+			return
+		}
+		diveIDs[i] = diveID
+	}
+
+	// Create the event
+	_, err = models.EventCreate(name, location, date, against, userID, eventTypeID, diveIDs)
+	if err != nil {
+		log.Printf("Error creating event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error creating event"})
+		return
+	}
+
+	// Redirect to the user show page, but will change this to the event show page
+	// when that is complete
+	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", userID))
 }
