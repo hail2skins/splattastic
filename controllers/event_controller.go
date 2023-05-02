@@ -73,8 +73,8 @@ func EventCreate(c *gin.Context) {
 		return
 	}
 	against := c.PostForm("against")
-	dateStr := c.PostForm("date")
-	date, err := time.Parse("01/02/2006", dateStr)
+	dateStr := c.PostForm("event_date")
+	date, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		log.Printf("Error parsing date: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
@@ -82,21 +82,24 @@ func EventCreate(c *gin.Context) {
 	}
 	location := c.PostForm("location")
 
-	// Get the user ID from JWT claims
-	userID, _ := strconv.ParseUint(c.MustGet("userID").(string), 10, 64)
+	// Get the user ID from session claims
+	userID := uint64(c.MustGet("user_id").(uint))
 
 	// Handle dives
 	diveIDsStr := c.PostForm("dive_ids")
-	diveIDStrs := strings.Split(diveIDsStr, ",")
-	diveIDs := make([]uint64, len(diveIDStrs))
-	for i, diveIDStr := range diveIDStrs {
-		diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
-		if err != nil {
-			log.Printf("Error converting dive ID to uint: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid dive ID"})
-			return
+	var diveIDs []uint64
+	if diveIDsStr != "" {
+		diveIDStrs := strings.Split(diveIDsStr, ",")
+		diveIDs = make([]uint64, len(diveIDStrs))
+		for i, diveIDStr := range diveIDStrs {
+			diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
+			if err != nil {
+				log.Printf("Error converting dive ID to uint: %v", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid dive ID"})
+				return
+			}
+			diveIDs[i] = diveID
 		}
-		diveIDs[i] = diveID
 	}
 
 	// Create the event

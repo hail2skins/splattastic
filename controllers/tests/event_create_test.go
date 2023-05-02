@@ -9,12 +9,16 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"text/template"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
 	"github.com/hail2skins/splattastic/controllers/helpers"
 	db "github.com/hail2skins/splattastic/database"
 	h "github.com/hail2skins/splattastic/helpers"
+	"github.com/hail2skins/splattastic/middlewares"
 	"github.com/hail2skins/splattastic/models"
 )
 
@@ -29,12 +33,20 @@ func TestEventCreate(t *testing.T) {
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
 	// Create a router with the test route
+	funcMap := template.FuncMap{
+		"mod": func(i, j int) int { return i % j },
+		// Provides view method to shorten the names of dives in some views
+		"shorten": h.Abbreviate,
+	}
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
-	h.InitRouterWithFuncMap(router)
-	router.LoadHTMLGlob("../../templates/**/**")
-	router.POST("/user/:id/event", controllers.EventCreate)
+	router.SetFuncMap(funcMap)
 
+	router.LoadHTMLGlob("../../templates/**/**")
+	router.POST("/user/:id/event", func(c *gin.Context) {
+		c.Set("userID", c.Param("id"))
+		controllers.EventCreate(c)
+	})
 	// Insert test data and defer cleanup
 	dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2 := helpers.CreateTestData()
 
@@ -50,6 +62,9 @@ func TestEventCreate(t *testing.T) {
 
 	// Create a User
 	user, _ := models.UserCreate("test@example.com", "testpassword", "Test", "User", "testuser", ut1.Name)
+
+	setupSession(router, uint64(user.ID))
+	router.Use(middlewares.AuthenticateUser())
 
 	// use form to create event
 	data := url.Values{}
@@ -79,12 +94,16 @@ func TestEventCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Set the dive_ids in the data
-			divesStr := make([]string, len(tc.dives))
-			for i, diveID := range tc.dives {
-				divesStr[i] = strconv.FormatUint(diveID, 10)
+			// Set the dive_ids in the data only if there are dives in the test case
+			if len(tc.dives) > 0 {
+				divesStr := make([]string, len(tc.dives))
+				for i, diveID := range tc.dives {
+					divesStr[i] = strconv.FormatUint(diveID, 10)
+				}
+				data.Set("dive_ids", strings.Join(divesStr, ","))
+			} else {
+				data.Del("dive_ids") // Remove the "dive_ids" key from the data when there are no dives in the test case
 			}
-			data.Set("dive_ids", strings.Join(divesStr, ","))
 
 			// Create a request to send to the above route
 			req, err := http.NewRequest("POST", "/user/"+helpers.UintToString(user.ID)+"/event", strings.NewReader(data.Encode()))
@@ -100,22 +119,31 @@ func TestEventCreate(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			// Check to see if the response was what you expected
-			if w.Code != http.StatusOK {
+			if w.Code != http.StatusFound {
 				t.Errorf("Expected status code %v but got %v", http.StatusOK, w.Code)
 			}
 			// Get the created event
 			var createdEvent models.Event
-			db.Database.Where("name = ?", "Test Event").First(&createdEvent)
+			result := db.Database.Where("name = ?", "Test Event").First(&createdEvent)
 
-			// Clean up the created event
-			db.Database.Unscoped().Delete(&createdEvent)
+			if result.Error != nil {
+				t.Errorf("Error retrieving the created event: %v", result.Error)
+			}
 
-			// Clean up the UserEventDives associated with the event
+			// Check if the number of created UserEventDives is equal to the number of dives specified in the test case
 			var userEventDives []models.UserEventDive
 			db.Database.Where("event_id = ?", createdEvent.ID).Find(&userEventDives)
+			if len(userEventDives) != len(tc.dives) {
+				t.Errorf("Expected %d UserEventDives, but got %d", len(tc.dives), len(userEventDives))
+			}
+
+			// Clean up the UserEventDives associated with the event
 			for _, userEventDive := range userEventDives {
 				db.Database.Unscoped().Delete(&userEventDive)
 			}
+
+			// Clean up the created event
+			db.Database.Unscoped().Delete(&createdEvent)
 		})
 	}
 
@@ -162,4 +190,18 @@ func deleteUserEventDives() error {
 	//fmt.Println("UserEventDives after deletion:", userEventDivesAfterDeletion)
 
 	return nil
+}
+
+func setupSession(router *gin.Engine, userID uint64) {
+	// Configure session middleware
+	store := memstore.NewStore([]byte(os.Getenv("SESSION_SECRET")))
+	router.Use(sessions.Sessions("mysession", store))
+
+	// Set the user ID in the session
+	router.Use(func(c *gin.Context) {
+		session := sessions.Default(c)
+		session.Set("userID", fmt.Sprintf("%d", userID))
+		_ = session.Save()
+		c.Next()
+	})
 }

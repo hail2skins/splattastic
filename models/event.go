@@ -56,7 +56,12 @@ func EventCreate(name string, location string, date time.Time, against string, u
 			EventID: uint64(event.ID),
 			DiveID:  diveID,
 		}
-		db.Database.Create(userEventDive)
+		result := db.Database.Create(userEventDive)
+		if result.Error != nil {
+			log.Printf("Error creating UserEventDive: %v", result.Error)
+		} else {
+			log.Printf("Created UserEventDive with ID: %d", userEventDive.ID)
+		}
 	}
 
 	return event, nil
