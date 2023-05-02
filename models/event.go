@@ -67,12 +67,14 @@ func EventCreate(name string, location string, date time.Time, against string, u
 	return event, nil
 }
 
+// HasDive method is really for the model test.  May want to move this a bit later, though it may come in handy here we'll see.
 func (e *Event) HasDive(dive *Dive) bool {
 	var userEventDives []UserEventDive
 	db.Database.Where("event_id = ?", e.ID).Find(&userEventDives)
 
 	//fmt.Printf("UserEventDives: %+v\n", userEventDives) // Add this line for debugging
 
+	// loop through the userEventDives and see if the diveID matches the dive.ID
 	for _, userEventDive := range userEventDives {
 		if userEventDive.DiveID == uint64(dive.ID) {
 			return true
@@ -80,4 +82,35 @@ func (e *Event) HasDive(dive *Dive) bool {
 	}
 
 	return false
+}
+
+// EventShow returns a single event with related dives
+func EventShow(id uint64) (*Event, error) {
+	event := &Event{}
+	result := db.Database.Preload("User").Preload("EventType").First(&event, id)
+	if result.Error != nil {
+		log.Printf("Error retrieving event: %v", result.Error)
+		return nil, result.Error
+	}
+
+	// Find the associated UserEventDives for the event
+	var userEventDives []UserEventDive
+	result = db.Database.Where("event_id = ?", id).Find(&userEventDives)
+	if result.Error != nil {
+		log.Printf("Error retrieving userEventDives: %v", result.Error)
+		return nil, result.Error
+	}
+
+	// Find the associated dives for each UserEventDive
+	for _, userEventDive := range userEventDives {
+		dive := &Dive{}
+		result := db.Database.First(&dive, userEventDive.DiveID)
+		if result.Error != nil {
+			log.Printf("Error retrieving dive: %v", result.Error)
+			return nil, result.Error
+		}
+		// Add logic to append the dive to an appropriate field in the event struct or handle it as needed
+	}
+
+	return event, nil
 }

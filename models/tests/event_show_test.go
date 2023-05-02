@@ -9,14 +9,14 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestEventCreate tests the EventCreate function
-// Need to create the associated records first
-func TestEventCreate(t *testing.T) {
+// TestEventShow tests the event show function
+// Path /user/:id/event/:eventID
+func TestEventShow(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
 
-	// // Insert test data and defer cleanup
+	// Insert test data and defer cleanup
 	dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2 := helpers.CreateTestData()
 
 	// Create two dives
@@ -58,7 +58,7 @@ func TestEventCreate(t *testing.T) {
 	// Create a User
 	user, _ := models.UserCreate("test@example.com", "testpassword", "Test", "User", "testuser", ut1.Name)
 
-	// Create EventType
+	// Create an Event Type
 	et1, err := models.EventTypeCreate("Test Event Type")
 	if err != nil {
 		t.Fatalf("Error creating event type: %v", err)
@@ -67,10 +67,10 @@ func TestEventCreate(t *testing.T) {
 	// Use the test data to create a new event
 	name = "Test Event"
 	location := "Test Location"
-	date := time.Date(2018, 1, 1, 0, 0, 0, 0, time.UTC)
+	date := time.Date(2018, 1, 2, 0, 0, 0, 0, time.UTC)
 	against := "Test Against"
-	userID := user.ID
 	eventtypeID := et1.ID
+	userID := user.ID
 
 	// Test with 0 dives
 	event, err := models.EventCreate(name, location, date, against, uint64(userID), uint64(eventtypeID), []uint64{})
@@ -78,7 +78,17 @@ func TestEventCreate(t *testing.T) {
 		t.Fatalf("Error creating event with 0 dives: %v", err)
 	}
 
+	// Check if the event has 0 dives and other relevant stuff here
+	shownEvent, err := models.EventShow(uint64(event.ID))
+	if err != nil {
+		t.Fatalf("Error retrieving event1: %v", err)
+	}
+
+	if shownEvent.HasDive(dive) {
+		t.Fatalf("Expected event to have 0 dives but it has dives.")
+	}
 	// Check if event was created and associated with the user
+	// NOT doing this three times.  Once is enough.
 	if event.Name != name ||
 		event.Location != location ||
 		event.Date != date ||
@@ -88,82 +98,63 @@ func TestEventCreate(t *testing.T) {
 		t.Fatal("Event was not created correctly")
 	}
 
-	// Clean up event
+	// Delete user event dives
+	deleteUserEventDives() // shouldn't be any, but this is just in case
+	// Delete the event
 	db.Database.Unscoped().Delete(&event)
 
+	// Create event 2 with 1 dive
 	// Test with 1 dive
 	event1, err := models.EventCreate(name, location, date, against, uint64(userID), uint64(eventtypeID), []uint64{uint64(dive.ID)})
 	if err != nil {
 		t.Fatalf("Error creating event with 1 dive: %v", err)
 	}
 
-	// Check if the event is associated with the dive
-	if !event1.HasDive(dive) {
-		t.Fatal("Event should be associated with the dive")
+	// DO EventShow tests here
+	shownEvent1, err := models.EventShow(uint64(event1.ID))
+	if err != nil {
+		t.Fatalf("Error retrieving event1: %v", err)
 	}
 
-	// Clean up UserEventDive
+	if !shownEvent1.HasDive(dive) {
+		t.Fatalf("Expected event1 to have dive, but it did not")
+	}
+
+	// Delete the user event dives
 	deleteUserEventDives()
-	// Clean up event1
+	// Delete the event
 	db.Database.Unscoped().Delete(&event1)
 
-	// Test with 2 dives
+	// Create event 3 with 2 dives
 	event2, err := models.EventCreate(name, location, date, against, uint64(userID), uint64(eventtypeID), []uint64{uint64(dive.ID), uint64(dive2.ID)})
 	if err != nil {
 		t.Fatalf("Error creating event with 2 dives: %v", err)
 	}
 
-	// Check if the event is associated with both dives
-	if !event2.HasDive(dive) || !event2.HasDive(dive2) {
-		t.Fatal("Event should be associated with both dives")
+	// DO EventShow tests here
+	shownEvent2, err := models.EventShow(uint64(event2.ID))
+	if err != nil {
+		t.Fatalf("Error retrieving event2: %v", err)
 	}
 
-	// Delete user event dives
-	deleteUserEventDives()
-	// Clean up event2
-	db.Database.Unscoped().Delete(&event2)
+	if !shownEvent2.HasDive(dive) || !shownEvent2.HasDive(dive2) {
+		t.Fatalf("Expected event2 to have both dives, but it did not")
+	}
 
-	// Delete dives
+	// Delete the user event dives
+	deleteUserEventDives()
+	// Delete the event
+	db.Database.Unscoped().Delete(&event2)
+	// Delete the user
+	db.Database.Unscoped().Delete(&user)
+	// Delete the user type
+	db.Database.Unscoped().Delete(&ut1)
+	// Delete the event type
+	db.Database.Unscoped().Delete(&et1)
+	// Delete the dives
 	db.Database.Unscoped().Delete(&dive)
 	db.Database.Unscoped().Delete(&dive2)
-
-	// Delete event
-	db.Database.Unscoped().Delete(&event)
-
-	// Delete user
-	db.Database.Unscoped().Delete(&user)
-
-	// Delete user type
-	db.Database.Unscoped().Delete(&ut1)
-
-	// Delete event type
-	db.Database.Unscoped().Delete(&et1)
-
 	// Remove test data
 	helpers.CleanTestData(dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2)
 
-}
-
-func deleteUserEventDives() error {
-	var userEventDives []models.UserEventDive
-	result := db.Database.Find(&userEventDives)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	//fmt.Println("UserEventDives before deletion:", userEventDives)
-
-	for _, userEventDive := range userEventDives {
-		db.Database.Unscoped().Delete(&userEventDive)
-	}
-
-	// Check if the user event dives are deleted
-	var userEventDivesAfterDeletion []models.UserEventDive
-	result = db.Database.Find(&userEventDivesAfterDeletion)
-	if result.Error != nil {
-		return result.Error
-	}
-	//fmt.Println("UserEventDives after deletion:", userEventDivesAfterDeletion)
-
-	return nil
 }
