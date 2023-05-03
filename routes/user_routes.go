@@ -17,5 +17,6 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.POST("/:id", middlewares.CheckCurrentUser(), controllers.UserUpdate)
 		user.GET("/:id/event/new", middlewares.CheckCurrentUser(), controllers.EventNew)
 		user.POST("/:id/event", middlewares.CheckCurrentUser(), controllers.EventCreate)
+		user.GET("/:id/event/:event_id", controllers.EventShow)
 	}
 }

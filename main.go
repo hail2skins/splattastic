@@ -28,9 +28,10 @@ func serveApplication() {
 	// This allows a "mod" function in our edit_event_new.html page to order checkboxes for dives in such a way
 	// as they form colums.
 	funcMap := template.FuncMap{
-		"mod": func(i, j int) int { return i % j },
-		// Provides view method to shorten the names of dives in some views
-		"shorten": helpers.Abbreviate,
+		"mod":     func(i, j int) int { return i % j }, // used to order checkboxes for dives
+		"shorten": helpers.Abbreviate,                  // used to abbreviate dive information. See helpers\abbreviate.go
+		"seq":     helpers.Seq,                         // used to generate a sequence of numbers for the event show page
+		"inc":     func(x int) int { return x + 1 },    // used to inc index on the event show page
 	}
 
 	r := gin.Default()

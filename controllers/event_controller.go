@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -86,10 +85,9 @@ func EventCreate(c *gin.Context) {
 	userID := uint64(c.MustGet("user_id").(uint))
 
 	// Handle dives
-	diveIDsStr := c.PostForm("dive_ids")
+	diveIDStrs := c.PostFormArray("dive_id")
 	var diveIDs []uint64
-	if diveIDsStr != "" {
-		diveIDStrs := strings.Split(diveIDsStr, ",")
+	if len(diveIDStrs) > 0 {
 		diveIDs = make([]uint64, len(diveIDStrs))
 		for i, diveIDStr := range diveIDStrs {
 			diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
@@ -103,7 +101,7 @@ func EventCreate(c *gin.Context) {
 	}
 
 	// Create the event
-	_, err = models.EventCreate(name, location, date, against, userID, eventTypeID, diveIDs)
+	event, err := models.EventCreate(name, location, date, against, userID, eventTypeID, diveIDs)
 	if err != nil {
 		log.Printf("Error creating event: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error creating event"})
@@ -112,5 +110,71 @@ func EventCreate(c *gin.Context) {
 
 	// Redirect to the user show page, but will change this to the event show page
 	// when that is complete
-	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", userID))
+	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d/event/%d", userID, event.ID))
+}
+
+// EventShow renders the event show page
+// Requires Users/EventTypes and UserEventDives
+func EventShow(c *gin.Context) {
+	// Get the event ID from the URL
+	idStr := c.Param("event_id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	// Retrieve the event from the database
+	event, err := models.EventShow(id)
+	if err != nil || event == nil {
+		log.Printf("Error retrieving event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event"})
+		return
+	}
+
+	// Retrieve the user from the database
+	user, err := models.UserShow(event.UserID)
+	if err != nil || user == nil {
+		log.Printf("Error retrieving user: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user"})
+		return
+	}
+
+	// Retrieve the event type from the database
+	eventType, err := models.EventTypeShow(event.EventTypeID)
+	if err != nil || eventType == nil {
+		log.Printf("Error retrieving event type: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event type"})
+		return
+	}
+
+	// Retrieve the dives from the database
+	dives, err := models.GetDivesForEvent(uint64(event.ID))
+	if err != nil {
+		log.Printf("Error retrieving dives for event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving dives"})
+		return
+	}
+
+	// Format the event date
+	formattedDate := event.Date.Format("01/02/2006")
+
+	c.HTML(
+		http.StatusOK,
+		"events/show.html", // Routes to /user/events/:id
+		gin.H{
+			"title":          "Event",
+			"logged_in":      h.IsUserLoggedIn(c),
+			"header":         "Event",
+			"event":          event,
+			"event_type":     eventType,
+			"dives":          dives,
+			"user":           user,
+			"user_id":        c.GetUint("user_id"),
+			"test_run":       os.Getenv("TEST_RUN") == "true",
+			"current_user":   h.IsCurrentUser(c, uint64(user.ID)),
+			"formatted_date": formattedDate,
+		},
+	)
 }

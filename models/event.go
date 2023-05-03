@@ -25,6 +25,7 @@ type Event struct {
 // Dives may have been selected.  Between and many.  Need to figure out how to do that.
 func EventCreate(name string, location string, date time.Time, against string, userID uint64, eventTypeID uint64, diveIDs []uint64) (*Event, error) {
 	// Check if the associated records exist
+	//log.Printf("Dive IDs in EventCreate: %v", diveIDs) // Add this line for debugging
 	_, err := UserShow(userID)
 	if err != nil {
 		return nil, err
@@ -113,4 +114,28 @@ func EventShow(id uint64) (*Event, error) {
 	}
 
 	return event, nil
+}
+
+// GetDivesForEvent retrieves the dives associated with an event
+func GetDivesForEvent(eventID uint64) ([]Dive, error) {
+	var userEventDives []UserEventDive
+	var dives []Dive
+
+	err := db.Database.Where("event_id = ?", eventID).Find(&userEventDives).Error
+	if err != nil {
+		log.Printf("Error retrieving UserEventDives: %v", err)
+		return nil, err
+	}
+
+	for _, userEventDive := range userEventDives {
+		var dive Dive
+		err = db.Database.Preload("DiveType").Preload("DiveGroup").Preload("BoardHeight").Preload("BoardType").First(&dive, userEventDive.DiveID).Error
+		if err != nil {
+			log.Printf("Error retrieving dive: %v", err)
+			return nil, err
+		}
+		dives = append(dives, dive)
+	}
+
+	return dives, nil
 }

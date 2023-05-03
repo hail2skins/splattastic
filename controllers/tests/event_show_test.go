@@ -1,15 +1,14 @@
 package controllers
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"text/template"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hail2skins/splattastic/controllers"
@@ -20,8 +19,7 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestEventCreate tests the EventCreate function
-func TestEventCreate(t *testing.T) {
+func TestEventShow(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
@@ -54,9 +52,6 @@ func TestEventCreate(t *testing.T) {
 	dive1, _ := models.DiveCreate("Test Dive 1", 154, 2.5, uint64(dt1.ID), uint64(dg1.ID), uint64(bt1.ID), uint64(bh1.ID))
 	dive2, _ := models.DiveCreate("Test Dive 2", 155, 3.5, uint64(dt2.ID), uint64(dg2.ID), uint64(bt2.ID), uint64(bh2.ID))
 
-	// Create an event type
-	et1, _ := models.EventTypeCreate("Test Event Type")
-
 	// Create a user type
 	ut1, _ := models.CreateUserType("Test User Type")
 
@@ -68,85 +63,72 @@ func TestEventCreate(t *testing.T) {
 	helpers.SetupSession(router, uint(userID))
 	router.Use(middlewares.AuthenticateUser())
 
-	// use form to create event
-	data := url.Values{}
-	data.Set("name", "Test Event")
-	data.Set("location", "Test Location")
-	data.Set("event_date", "2019-01-02")
-	data.Set("against", "Test Against")
-	data.Set("user_id", fmt.Sprintf("%d", user.ID))
-	data.Set("event_type_id", fmt.Sprintf("%d", et1.ID))
 	testCases := []struct {
-		name  string
-		dives []uint64
+		name          string
+		diveIDs       []uint64
+		expectedDives int
 	}{
 		{
-			name:  "zero dives",
-			dives: []uint64{},
+			name:          "0 dives",
+			diveIDs:       []uint64{},
+			expectedDives: 0,
 		},
 		{
-			name:  "one dive",
-			dives: []uint64{uint64(dive1.ID)},
+			name:          "1 dive",
+			diveIDs:       []uint64{uint64(dive1.ID)},
+			expectedDives: 1,
 		},
 		{
-			name:  "two dives",
-			dives: []uint64{uint64(dive1.ID), uint64(dive2.ID)},
+			name:          "multiple dives",
+			diveIDs:       []uint64{uint64(dive1.ID), uint64(dive2.ID)},
+			expectedDives: 2,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Set the dive_ids in the data only if there are dives in the test case
-			data.Del("dive_id") // Remove any previously set "dive_id" fields
-			for _, diveID := range tc.dives {
-				data.Add("dive_id", strconv.FormatUint(diveID, 10))
-			}
+			// Create an event type
+			et1, _ := models.EventTypeCreate("Test Event Type")
+			// Create an event with the specified dives
+			eventDate := time.Now()
+			event, _ := models.EventCreate("Test Event", "Test Location", eventDate, "Test Against", uint64(user.ID), uint64(et1.ID), tc.diveIDs)
 
-			// Create a request to send to the above route
-			req, err := http.NewRequest("POST", "/user/"+helpers.UintToString(user.ID)+"/event", strings.NewReader(data.Encode()))
+			// Create a request to the test route
+			req, err := http.NewRequest("GET", "/user/"+helpers.UintToString(user.ID)+"/event/"+helpers.UintToString(event.ID), nil)
 			if err != nil {
 				t.Errorf("Error creating request: %v", err)
 			}
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			// Create a response recorder
 			w := httptest.NewRecorder()
 
-			// Perform the request
+			// Serve the request to the recorder
 			router.ServeHTTP(w, req)
 
 			// Check to see if the response was what you expected
-			if w.Code != http.StatusFound {
-				t.Errorf("Expected status code %v but got %v", http.StatusFound, w.Code)
+			if w.Code != http.StatusOK {
+				t.Errorf("Expected response code %v, got %v", http.StatusOK, w.Code)
 			}
 
-			// Get the created event
-			var createdEvent models.Event
-			result := db.Database.Where("name = ?", "Test Event").First(&createdEvent)
-
-			if result.Error != nil {
-				t.Errorf("Error retrieving the created event: %v", result.Error)
+			// Check if the number of dives is as expected
+			var eventData map[string]interface{}
+			err = json.Unmarshal(w.Body.Bytes(), &eventData)
+			if err != nil {
+				t.Errorf("Error unmarshalling response JSON: %v", err)
+			}
+			dives := eventData["dives"].([]interface{})
+			if len(dives) != tc.expectedDives {
+				t.Errorf("Expected %d dives, got %d", tc.expectedDives, len(dives))
 			}
 
-			// Check to see if the response redirected to the event show page
-			if w.Header().Get("Location") != "/user/"+helpers.UintToString(user.ID)+"/event/"+helpers.UintToString(createdEvent.ID) {
-				t.Errorf("Expected redirect to /user/%d/event/1 but got %s", user.ID, w.Header().Get("Location"))
-			}
+			// Cleanup User Event Dives
+			helpers.DeleteUserEventDives()
 
-			// Check if the number of created UserEventDives is equal to the number of dives specified in the test case
-			var userEventDives []models.UserEventDive
-			db.Database.Where("event_id = ?", createdEvent.ID).Find(&userEventDives)
-			if len(userEventDives) != len(tc.dives) {
-				t.Errorf("Expected %d UserEventDives, but got %d", len(tc.dives), len(userEventDives))
-			}
+			// Cleanup
+			db.Database.Unscoped().Delete(&event)
 
-			// Clean up the UserEventDives associated with the event
-			for _, userEventDive := range userEventDives {
-				db.Database.Unscoped().Delete(&userEventDive)
-			}
-
-			// Clean up the created event
-			db.Database.Unscoped().Delete(&createdEvent)
+			// Delete event type
+			db.Database.Unscoped().Delete(&et1)
 		})
 	}
 
@@ -163,10 +145,6 @@ func TestEventCreate(t *testing.T) {
 	// Delete user type
 	db.Database.Unscoped().Delete(&ut1)
 
-	// Delete event type
-	db.Database.Unscoped().Delete(&et1)
-
 	// Remove test data
 	helpers.CleanTestData(dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2)
-
 }
