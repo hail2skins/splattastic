@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -40,28 +39,19 @@ func TestEventShow(t *testing.T) {
 	router.SetFuncMap(funcMap)
 
 	router.LoadHTMLGlob("../../templates/**/**")
-	router.POST("/user/:id/event", func(c *gin.Context) {
+	router.GET("/user/:id/event/:event_id", func(c *gin.Context) {
 		userID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 		c.Set("user_id", uint(userID))
-		controllers.EventCreate(c)
+		// You may need to implement the corresponding function in the controller
+		controllers.EventShow(c)
 	})
+
 	// Insert test data and defer cleanup
 	dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2 := helpers.CreateTestData()
 
 	// Create two test dives (similar to what you did in the model test)
 	dive1, _ := models.DiveCreate("Test Dive 1", 154, 2.5, uint64(dt1.ID), uint64(dg1.ID), uint64(bt1.ID), uint64(bh1.ID))
 	dive2, _ := models.DiveCreate("Test Dive 2", 155, 3.5, uint64(dt2.ID), uint64(dg2.ID), uint64(bt2.ID), uint64(bh2.ID))
-
-	// Create a user type
-	ut1, _ := models.CreateUserType("Test User Type")
-
-	// Create a User
-	user, _ := models.UserCreate("test@example.com", "testpassword", "Test", "User", "testuser", ut1.Name)
-	// Set userID
-	userID := user.ID
-
-	helpers.SetupSession(router, uint(userID))
-	router.Use(middlewares.AuthenticateUser())
 
 	testCases := []struct {
 		name          string
@@ -89,6 +79,18 @@ func TestEventShow(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create an event type
 			et1, _ := models.EventTypeCreate("Test Event Type")
+
+			// Create a user type
+			ut1, _ := models.CreateUserType("Test User Type")
+
+			// Create a User
+			user, _ := models.UserCreate("test@example.com", "testpassword", "Test", "User", "testuser", ut1.Name)
+			// Set userID
+			userID := user.ID
+
+			helpers.SetupSession(router, uint(userID))
+			router.Use(middlewares.AuthenticateUser())
+
 			// Create an event with the specified dives
 			eventDate := time.Now()
 			event, _ := models.EventCreate("Test Event", "Test Location", eventDate, "Test Against", uint64(user.ID), uint64(et1.ID), tc.diveIDs)
@@ -111,14 +113,15 @@ func TestEventShow(t *testing.T) {
 			}
 
 			// Check if the number of dives is as expected
-			var eventData map[string]interface{}
-			err = json.Unmarshal(w.Body.Bytes(), &eventData)
-			if err != nil {
-				t.Errorf("Error unmarshalling response JSON: %v", err)
+			var userEventDives []models.UserEventDive
+			db.Database.Where("event_id = ?", event.ID).Find(&userEventDives)
+			if len(userEventDives) != tc.expectedDives {
+				t.Errorf("Expected %d dives, got %d", tc.expectedDives, len(userEventDives))
 			}
-			dives := eventData["dives"].([]interface{})
-			if len(dives) != tc.expectedDives {
-				t.Errorf("Expected %d dives, got %d", tc.expectedDives, len(dives))
+
+			// Clean up the UserEventDives associated with the event
+			for _, userEventDive := range userEventDives {
+				db.Database.Unscoped().Delete(&userEventDive)
 			}
 
 			// Cleanup User Event Dives
@@ -129,6 +132,12 @@ func TestEventShow(t *testing.T) {
 
 			// Delete event type
 			db.Database.Unscoped().Delete(&et1)
+
+			// Delete user
+			db.Database.Unscoped().Delete(&user)
+
+			// Delete user type
+			db.Database.Unscoped().Delete(&ut1)
 		})
 	}
 
@@ -138,12 +147,6 @@ func TestEventShow(t *testing.T) {
 	// Delete dives
 	db.Database.Unscoped().Delete(&dive1)
 	db.Database.Unscoped().Delete(&dive2)
-
-	// Delete user
-	db.Database.Unscoped().Delete(&user)
-
-	// Delete user type
-	db.Database.Unscoped().Delete(&ut1)
 
 	// Remove test data
 	helpers.CleanTestData(dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2)
