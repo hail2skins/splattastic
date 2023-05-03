@@ -110,7 +110,7 @@ func EventShow(id uint64) (*Event, error) {
 			log.Printf("Error retrieving dive: %v", result.Error)
 			return nil, result.Error
 		}
-		// Add logic to append the dive to an appropriate field in the event struct or handle it as needed
+
 	}
 
 	return event, nil
@@ -138,4 +138,19 @@ func GetDivesForEvent(eventID uint64) ([]Dive, error) {
 	}
 
 	return dives, nil
+}
+
+// GetUserEvents retrieves all events for a user.
+// We are NOT populating UserEventDives here.  Instead when needed
+// in the controller we will call GetDivesForEvent to populate the
+// dives for each event.
+func GetUserEvents(userID uint64) ([]Event, error) {
+	var events []Event
+	err := db.Database.Preload("EventType").Where("user_id = ?", userID).Find(&events).Error
+	if err != nil {
+		log.Printf("Error retrieving events: %v", err)
+		return nil, err
+	}
+
+	return events, nil
 }

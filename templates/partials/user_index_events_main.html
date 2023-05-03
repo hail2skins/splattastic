@@ -1,0 +1,51 @@
+{{ define "partials/user_index_events_main.html" }}
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Event Type</th>
+                <th>Location</th>
+                <th>Against</th>
+                <th>Dives</th>
+                {{ if or .current_user .test_run }}
+                <th>Edit Dive</th>
+                <th>Delete Dive</th>
+                {{ end }}
+            </tr>
+        </thead>
+    
+    <tbody>
+      {{ $current_user := .current_user }} <!-- Store the current_user value in a variable for the loop -->
+      {{ $test_run := .test_run }} <!-- Store the test_run value in a variable for the loop -->
+    
+      {{ range .events }}
+        <tr>
+            <td><a href="/user/{{ .user.ID }}/event/{{ .event.ID }}">{{ .event.Name }}</td></a>
+            <td>{{ .event.Date }}</td>
+            <td>{{ .event.EventType.Name }}</td></a>
+            <td>{{ .event.Location }}</td>
+            <td>{{ .event.Against }}</td>
+            <td>{{ range .dives }}
+                {{ .Number }}{{ .DiveType.Letter }}
+                {{ end }}
+            </td>
+            {{ if or $current_user $test_run }}
+            <td><a class="btn btn-outline-primary" href="/user/ {{ .user.ID }}/event/edit/{{ .event.ID }}" role="button">Edit Dive</a></td>
+            <td><a class="btn btn-outline-danger" href="/user/{{ .user.ID }}/event/{{ .event.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete Dive</a></td>
+            {{ end }}
+          </tr>
+      {{ else }}
+          <tr>
+          <td colspan="3">No Events yet</td>
+        </tr>
+          
+      {{ end }}
+    
+    </table>
+
+
+
+{{ end }}

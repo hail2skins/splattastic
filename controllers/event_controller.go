@@ -178,3 +178,68 @@ func EventShow(c *gin.Context) {
 		},
 	)
 }
+
+// GetUserEvents retrieves all user events for a given user
+// Here is where we will pull in dives
+func GetUserEvents(c *gin.Context) {
+	// Get the user ID from the URL
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting user ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Get the user for use in view
+	user, err := models.UserShow(id)
+	if err != nil {
+		log.Printf("Error retrieving user: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user"})
+		return
+	}
+
+	// Get the user events
+	events, err := models.GetUserEvents(id)
+	if err != nil {
+		log.Printf("Error retrieving user events: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user events"})
+		return
+	}
+
+	// Create a slice of maps to hold events and associated dives
+	eventsWithDives := make([]map[string]interface{}, 0, len(events))
+
+	// Loop through events to retrieve associated dives
+	for _, event := range events {
+		// Retrieve associated dives using model function
+		dives, err := models.GetDivesForEvent(uint64(event.ID))
+		if err != nil {
+			log.Printf("Error retrieving dives for event %v: %v", event.ID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving dives for event"})
+			return
+		}
+
+		eventWithDives := map[string]interface{}{
+			"event": event,
+			"dives": dives,
+			"user":  user,
+		}
+		eventsWithDives = append(eventsWithDives, eventWithDives)
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"events/user_index.html", // Routes to /user/:id/events
+		gin.H{
+			"title":        user.UserName + "'s Events",
+			"logged_in":    h.IsUserLoggedIn(c),
+			"header":       user.UserName + "'s Events",
+			"events":       eventsWithDives,
+			"test_run":     os.Getenv("TEST_RUN") == "true",
+			"user_id":      c.GetUint("user_id"),
+			"current_user": h.IsCurrentUser(c, uint64(user.ID)),
+			"user":         user,
+		},
+	)
+}
