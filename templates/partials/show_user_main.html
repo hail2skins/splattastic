@@ -21,7 +21,13 @@
                   
                   <div class="card-body">
                     <h5 class="card-title">Recent Events</h5>
-                    <p class="card-text">Something here</p>
+                    {{ $userID := .user.ID }}
+                    {{ range .events }}
+                      <p class="card-text"><a href="/user/{{ $userID }}/event/{{ .ID }}"> {{ .Name }}</p></a>
+                    {{ else }}
+                      <p class="card-text">No Events Yet</p>
+                    
+                    {{ end }}
                     
                   </div>
                   <div class="card-footer">

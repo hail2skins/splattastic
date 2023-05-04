@@ -39,6 +39,9 @@ func UserShow(c *gin.Context) {
 		return
 	}
 
+	// Get the last five user events
+	events, err := models.GetLastFiveEvents(id)
+
 	// Render the template
 	c.HTML(
 		http.StatusOK,
@@ -52,6 +55,7 @@ func UserShow(c *gin.Context) {
 			"header":       "User Profile",
 			"current_user": h.IsCurrentUser(c, uint64(user.ID)),
 			"user_id":      c.GetUint("user_id"),
+			"events":       events,
 		},
 	)
 }

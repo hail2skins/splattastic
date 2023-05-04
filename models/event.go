@@ -154,3 +154,18 @@ func GetUserEvents(userID uint64) ([]Event, error) {
 
 	return events, nil
 }
+
+// GetLastFiveEvents retrieves the last five events for a user.
+// We are NOT populating UserEventDives here.  Instead when needed
+// in the controller we will call GetDivesForEvent to populate the
+// dives for each event.
+func GetLastFiveEvents(userID uint64) (*[]Event, error) {
+	var events []Event
+	result := db.Database.Preload("EventType").Where("user_id = ?", userID).Order("updated_at desc").Limit(5).Find(&events)
+	if result.Error != nil {
+		log.Printf("Error retrieving events: %v", result.Error)
+		return nil, result.Error
+	}
+
+	return &events, nil
+}
