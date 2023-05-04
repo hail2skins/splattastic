@@ -243,3 +243,77 @@ func GetUserEvents(c *gin.Context) {
 		},
 	)
 }
+
+// EventEdit renders the event edit page
+func EventEdit(c *gin.Context) {
+	// Get the event ID from the URL
+	idStr := c.Param("event_id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	// Retrieve the event from the database
+	event, err := models.EventShow(id)
+	if err != nil || event == nil {
+		log.Printf("Error retrieving event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event"})
+		return
+	}
+
+	// Retrieve the event type from the database
+	eventType, err := models.EventTypeShow(event.EventTypeID)
+	if err != nil || eventType == nil {
+		log.Printf("Error retrieving event type: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event type"})
+		return
+	}
+
+	// Retrieve the dives from the database
+	eventDives, err := models.GetDivesForEvent(uint64(event.ID))
+	if err != nil {
+		log.Printf("Error retrieving dives for event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving dives"})
+		return
+	}
+
+	// retrieve event types from the database
+	eventTypes, err := models.EventTypesGet()
+	if err != nil {
+		log.Printf("Error retrieving event types: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event types"})
+		return
+	}
+
+	// retrieve the dives from the database
+	dives, err := models.DivesGet()
+	if err != nil {
+		log.Printf("Error retrieving dives: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving dives"})
+		return
+	}
+
+	// Format the event date
+	formattedDate := event.Date.Format("2006-01-02")
+
+	c.HTML(
+		http.StatusOK,
+		"events/edit.html", // Routes to /user/events/:id/edit
+		gin.H{
+			"title":          "Edit Event",
+			"logged_in":      h.IsUserLoggedIn(c),
+			"header":         "Edit Event",
+			"event":          event,
+			"eventType":      eventType,
+			"eventTypes":     eventTypes,
+			"eventDives":     eventDives,
+			"test_run":       os.Getenv("TEST_RUN") == "true",
+			"user_id":        c.GetUint("user_id"),
+			"current_user":   h.IsCurrentUser(c, uint64(event.UserID)),
+			"formatted_date": formattedDate,
+			"dives":          dives,
+		},
+	)
+}
