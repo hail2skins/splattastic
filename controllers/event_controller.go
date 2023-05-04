@@ -317,3 +317,54 @@ func EventEdit(c *gin.Context) {
 		},
 	)
 }
+
+// EventUpdate updates an event
+func EventUpdate(c *gin.Context) {
+	// Get the event ID from the URL
+	idStr := c.Param("event_id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	name := c.PostForm("name")
+	eventTypeIDStr := c.PostForm("event_type_id")
+	eventTypeID, err := strconv.ParseUint(eventTypeIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event type ID to uint: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event type ID"})
+		return
+	}
+	against := c.PostForm("against")
+	dateStr := c.PostForm("event_date")
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		log.Printf("Error parsing date: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+		return
+	}
+	location := c.PostForm("location")
+
+	// Get the user ID from session claims
+	userID := uint64(c.MustGet("user_id").(uint))
+
+	// Retrieve the event from the database
+	event, err := models.EventShow(id)
+	if err != nil || event == nil {
+		log.Printf("Error retrieving event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving event"})
+		return
+	}
+
+	// HOW DO I HANDLE DIVES HERE BOTH UPDATED/DELETED/ADDED?
+
+	// Update the event in the database
+	err, _ = event.Update(name, location, date, against, eventTypeID)
+
+	// and this with the dives.  Help please
+
+	c.Redirect(http.StatusFound, "/user/userID/event/event_id")
+
+}

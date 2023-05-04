@@ -169,3 +169,69 @@ func GetLastFiveEvents(userID uint64) (*[]Event, error) {
 
 	return &events, nil
 }
+
+// Update method updates an event
+func (e *Event) Update(name string, location string, date time.Time, against string, eventTypeID uint64, diveIDs []uint64) (*Event, error) {
+	// Check if the associated records exist
+	_, err := EventTypeShow(eventTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	e.Name = name
+	e.Location = location
+	e.Date = date
+	e.Against = against
+	e.EventTypeID = eventTypeID
+
+	result := db.Database.Save(e)
+	if result.Error != nil {
+		log.Printf("Error updating event: %v", result.Error)
+		return nil, result.Error
+	}
+
+	// Retrieve the existing dives associated with the event
+	existingDives, err := GetDivesForEvent(uint64(e.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map of the existing dive IDs
+	existingDiveIDs := make(map[uint64]bool)
+	for _, dive := range existingDives {
+		existingDiveIDs[uint64(dive.ID)] = true
+	}
+
+	// Add and update the dives associated with the event
+	for _, diveID := range diveIDs {
+		if existingDiveIDs[diveID] {
+			// Dive is already associated with the event, remove it from the existingDiveIDs map
+			delete(existingDiveIDs, diveID)
+		} else {
+			// Dive is not associated with the event, create a new UserEventDive record
+			userEventDive := &UserEventDive{
+				UserID:  e.UserID,
+				EventID: uint64(e.ID),
+				DiveID:  diveID,
+			}
+			result := db.Database.Create(userEventDive)
+			if result.Error != nil {
+				log.Printf("Error creating UserEventDive: %v", result.Error)
+			} else {
+				log.Printf("Created UserEventDive with ID: %d", userEventDive.ID)
+			}
+		}
+	}
+
+	// Remove the dives that are no longer associated with the event
+	for diveID := range existingDiveIDs {
+		result := db.Database.Delete(&UserEventDive{}, "user_id = ? AND event_id = ? AND dive_id = ?", e.UserID, uint64(e.ID), diveID)
+		if result.Error != nil {
+			log.Printf("Error deleting UserEventDive: %v", result.Error)
+		} else {
+			log.Printf("Deleted UserEventDive with UserID: %d, EventID: %d, and DiveID: %d", e.UserID, uint64(e.ID), diveID)
+		}
+	}
+
+	return e, nil
+}

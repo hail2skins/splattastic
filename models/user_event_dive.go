@@ -1,6 +1,7 @@
 package models
 
 import (
+	db "github.com/hail2skins/splattastic/database"
 	"gorm.io/gorm"
 )
 
@@ -14,4 +15,13 @@ type UserEventDive struct {
 	User  User
 	Event Event
 	Dive  Dive
+}
+
+// DeleteUserEventDivesByEventID deletes all the dives associated with an event
+func DeleteUserEventDivesByEventID(eventID uint) error {
+	err := db.Database.Where("event_id = ?", eventID).Unscoped().Delete(&UserEventDive{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
