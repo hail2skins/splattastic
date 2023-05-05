@@ -17,9 +17,18 @@ type UserEventDive struct {
 	Dive  Dive
 }
 
-// DeleteUserEventDivesByEventID deletes all the dives associated with an event
+// DeleteUserEventDivesByEventID deletes all the dives associated with an event in permanent fashion
 func DeleteUserEventDivesByEventID(eventID uint) error {
 	err := db.Database.Where("event_id = ?", eventID).Unscoped().Delete(&UserEventDive{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UserEventDiveDelete deletes a UserEventDive record soft delete for Update and probably Delete event functions
+func UserEventDiveDelete(eventID uint64) error {
+	err := db.Database.Where("event_id = ?", eventID).Delete(&UserEventDive{}).Error
 	if err != nil {
 		return err
 	}

@@ -318,7 +318,6 @@ func EventEdit(c *gin.Context) {
 	)
 }
 
-// EventUpdate updates an event
 func EventUpdate(c *gin.Context) {
 	// Get the event ID from the URL
 	idStr := c.Param("event_id")
@@ -358,13 +357,39 @@ func EventUpdate(c *gin.Context) {
 		return
 	}
 
-	// HOW DO I HANDLE DIVES HERE BOTH UPDATED/DELETED/ADDED?
+	// Handle dives
+	diveIDStrs := c.PostFormArray("dive_id")
+	var diveIDs []uint64
+	if len(diveIDStrs) > 0 {
+		diveIDs = make([]uint64, len(diveIDStrs))
+		for i, diveIDStr := range diveIDStrs {
+			diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
+			if err != nil {
+				log.Printf("Error converting dive ID to uint: %v", err)
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid dive ID"})
+				return
+			}
+			diveIDs[i] = diveID
+		}
+	}
 
 	// Update the event in the database
-	err, _ = event.Update(name, location, date, against, eventTypeID)
+	_, err = event.Update(name, location, date, against, eventTypeID, diveIDs)
+	if err != nil {
+		log.Printf("Error updating event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating event"})
+		return
+	}
 
-	// and this with the dives.  Help please
+	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d/event/%d", userID, id))
+}
 
-	c.Redirect(http.StatusFound, "/user/userID/event/event_id")
-
+// Helper function to check if a uint64 slice contains a value
+func contains(slice []uint64, value uint64) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
