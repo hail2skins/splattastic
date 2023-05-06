@@ -121,7 +121,7 @@ func GetDivesForEvent(eventID uint64) ([]Dive, error) {
 	var userEventDives []UserEventDive
 	var dives []Dive
 
-	err := db.Database.Where("event_id = ?", eventID).Find(&userEventDives).Error
+	err := db.Database.Where("event_id = ? AND deleted_at is NULL", eventID).Find(&userEventDives).Error
 	if err != nil {
 		log.Printf("Error retrieving UserEventDives: %v", err)
 		return nil, err
@@ -234,4 +234,16 @@ func (e *Event) Update(name string, location string, date time.Time, against str
 	}
 
 	return e, nil
+}
+
+// EventDelete soft deletes an event
+func EventDelete(id uint64) error {
+	UserEventDiveDelete(id)
+	result := db.Database.Delete(&Event{}, id)
+	if result.Error != nil {
+		log.Printf("Error deleting event: %v", result.Error)
+		return result.Error
+	}
+
+	return nil
 }

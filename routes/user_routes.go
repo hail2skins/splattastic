@@ -21,5 +21,6 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.GET("/:id/events", controllers.GetUserEvents)
 		user.GET("/:id/event/:event_id/edit", middlewares.CheckCurrentUser(), controllers.EventEdit)
 		user.POST("/:id/event/:event_id", middlewares.CheckCurrentUser(), controllers.EventUpdate)
+		user.DELETE("/:id/event/:event_id", middlewares.CheckCurrentUser(), controllers.EventDelete)
 	}
 }

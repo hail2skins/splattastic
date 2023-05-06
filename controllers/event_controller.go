@@ -393,3 +393,28 @@ func contains(slice []uint64, value uint64) bool {
 	}
 	return false
 }
+
+// EventDelete deletes an event
+func EventDelete(c *gin.Context) {
+	// Get the event ID from the URL
+	idStr := c.Param("event_id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	// Get the user ID from session claims
+	userID := uint64(c.MustGet("user_id").(uint))
+
+	// Delete the event from the database
+	err = models.EventDelete(id)
+	if err != nil {
+		log.Printf("Error deleting event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error deleting event"})
+		return
+	}
+
+	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", userID))
+}
