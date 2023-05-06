@@ -15,6 +15,7 @@ type UserEventDive struct {
 	User  User
 	Event Event
 	Dive  Dive
+	Score float64
 }
 
 // DeleteUserEventDivesByEventID deletes all the dives associated with an event in permanent fashion
