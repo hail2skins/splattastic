@@ -247,3 +247,37 @@ func EventDelete(id uint64) error {
 
 	return nil
 }
+
+// Using this instead of GetDivesForEvent because we need the UserEventDiveID
+// and I am afraid to change GetDivesForEvent because it is used in a lot of places.
+// but ideally we would just use GetDivesForEvent and add the UserEventDiveID to the
+type DiveWithUserEventDiveID struct {
+	Dive            Dive
+	UserEventDiveID uint64
+}
+
+func GetDivesWithUserEventDiveIDForEvent(eventID uint64) ([]DiveWithUserEventDiveID, error) {
+	var userEventDives []UserEventDive
+	var dives []DiveWithUserEventDiveID
+
+	err := db.Database.Where("event_id = ? AND deleted_at is NULL", eventID).Find(&userEventDives).Error
+	if err != nil {
+		log.Printf("Error retrieving UserEventDives: %v", err)
+		return nil, err
+	}
+
+	for _, userEventDive := range userEventDives {
+		var dive Dive
+		err = db.Database.Preload("DiveType").Preload("DiveGroup").Preload("BoardHeight").Preload("BoardType").First(&dive, userEventDive.DiveID).Error
+		if err != nil {
+			log.Printf("Error retrieving dive: %v", err)
+			return nil, err
+		}
+		dives = append(dives, DiveWithUserEventDiveID{
+			Dive:            dive,
+			UserEventDiveID: uint64(userEventDive.ID),
+		})
+	}
+
+	return dives, nil
+}

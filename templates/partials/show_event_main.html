@@ -32,14 +32,20 @@
                                                     <h5>Judge Awards</h5>
                                                 </div>
                                             </div>
+                                            {{ $outer := . }}
                                             <div class="row">
                                                 {{range $i := seq 1 9}}
                                                     <div class="col">
                                                         <div class="border text-center mb-3">
                                                             {{$i}}
                                                         </div>
-                                                        <div class="border text-center">
+                                                        <div class="border text-center score{{ $i }}" data-dive-id="{{ $dive.ID }}" data-score-index="{{ $i }}">
                                                             <!-- Possible score goes here -->
+                                                            {{range $score := index $.scores $dive.ID}}
+                                                                {{if eq $score.Judge $i}}
+                                                                    {{$score.Value}}
+                                                                {{ end }}
+                                                            {{ end }}
                                                         </div>
                                                     </div>
                                                 {{end}}
@@ -52,6 +58,15 @@
                                                     <div class="border text-center">
                                                         <!-- Total score goes here -->
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col">
+                                                    <h5>
+                                                    <button type="button" class="btn btn-primary add-score" data-bs-toggle="modal" data-bs-target="#scoreModal" data-dive-id="{{ $dive.ID }}" data-user-event-dive-id="{{ index $.diveIDToUserEventDiveID $dive.ID }}">
+                                                        Add Score
+                                                    </button>
+                                                    </h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -74,12 +89,67 @@
                         {{end}}
                     </div>
                 </div>
+<!-- The modal structure -->
+<div class="modal fade" id="scoreModal" tabindex="-1" aria-labelledby="scoreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="scoreModalLabel">Add Score</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="scoreForm">
+<!-- Inside the modal-body -->
+<div class="modal-body">
+    <form id="scoreForm">
+        <input type="hidden" name="userId" value="{{ .user.ID }}">
+        <input type="hidden" name="eventId" value="{{ .event.ID }}">
+      <div class="row mb-3">
+        {{range $i := seq 1 3}}
+          <div class="col">
+            <label for="score{{$i}}" class="form-label">Judge {{$i}} Score</label>
+            <input type="number" step="0.01" class="form-control score-input" id="score{{$i}}" name="score{{$i}}">
+          </div>
+        {{end}}
+      </div>
+      <div class="row mb-3">
+        {{range $i := seq 4 6}}
+          <div class="col">
+            <label for="score{{$i}}" class="form-label">Judge {{$i}} Score</label>
+            <input type="number" step="0.01" class="form-control score-input" id="score{{$i}}" name="score{{$i}}">
+          </div>
+        {{end}}
+      </div>
+      <div class="row mb-3">
+        {{range $i := seq 7 9}}
+          <div class="col">
+            <label for="score{{$i}}" class="form-label">Judge {{$i}} Score</label>
+            <input type="number" step="0.01" class="form-control score-input" id="score{{$i}}" name="score{{$i}}">
+          </div>
+        {{end}}
+      </div>
+      <input type="hidden" id="diveId" name="diveId" class="modal-diveId">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <!-- In your modal-body, after the closing </form> tag -->
+    <div id="errorAlert" class="alert alert-danger mt-3" style="display:none;"></div>
+  </div>
+  
+      </div>
+    </div>
+  </div>
+        </div>
+      </div>
+    </div>
+  </div>
                 
-        <div class="container px-4 px-lg-5" justify-content-end>
+        <div class="container px-4 px-lg-5">
         {{ if or .current_user .test_run }}
         <a class="btn btn-outline-primary" href="/user/{{ .user.ID }}/event/{{ .event.ID }}/edit" role="button">Edit</a>
         <a class="btn btn-outline-danger" href="/user/{{ .user.ID }}/event/{{ .event.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a>   
         {{ end }}
         </div>
     </article>
+
+    <script src="/js/score_submission.js"></script>
 {{ end }}

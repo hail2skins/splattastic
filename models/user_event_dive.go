@@ -15,7 +15,6 @@ type UserEventDive struct {
 	User  User
 	Event Event
 	Dive  Dive
-	Score float64
 }
 
 // DeleteUserEventDivesByEventID deletes all the dives associated with an event in permanent fashion
@@ -34,4 +33,11 @@ func UserEventDiveDelete(eventID uint64) error {
 		return err
 	}
 	return nil
+}
+
+// GetUserEventDivesForEvent retrieves UserEventDive records for a specific event
+func GetUserEventDivesForEvent(eventID uint64) ([]UserEventDive, error) {
+	var userEventDives []UserEventDive
+	err := db.Database.Where("event_id = ?", eventID).Find(&userEventDives).Error
+	return userEventDives, err
 }

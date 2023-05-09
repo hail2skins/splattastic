@@ -157,6 +157,32 @@ func EventShow(c *gin.Context) {
 		return
 	}
 
+	// Fetch the scores for each dive
+	diveScores := make(map[uint64][]models.Score)
+	for _, dive := range dives {
+		scores, err := models.FetchScores(uint64(user.ID), uint64(event.ID), uint64(dive.ID))
+		if err != nil {
+			log.Printf("Error fetching scores: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error fetching scores"})
+			return
+		}
+		diveScores[uint64(dive.ID)] = scores
+	}
+
+	// Retrieve the user event dives from the database
+	userEventDives, err := models.GetUserEventDivesForEvent(id)
+	if err != nil {
+		log.Printf("Error retrieving user event dives for event: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user event dives"})
+		return
+	}
+
+	// Associate dives with user event dives
+	diveIDToUserEventDiveID := make(map[uint64]uint64)
+	for _, userEventDive := range userEventDives {
+		diveIDToUserEventDiveID[userEventDive.DiveID] = uint64(userEventDive.ID)
+	}
+
 	// Format the event date
 	formattedDate := event.Date.Format("01/02/2006")
 
@@ -164,17 +190,19 @@ func EventShow(c *gin.Context) {
 		http.StatusOK,
 		"events/show.html", // Routes to /user/events/:id
 		gin.H{
-			"title":          "Event",
-			"logged_in":      h.IsUserLoggedIn(c),
-			"header":         "Event",
-			"event":          event,
-			"event_type":     eventType,
-			"dives":          dives,
-			"user":           user,
-			"user_id":        c.GetUint("user_id"),
-			"test_run":       os.Getenv("TEST_RUN") == "true",
-			"current_user":   h.IsCurrentUser(c, uint64(user.ID)),
-			"formatted_date": formattedDate,
+			"title":                   "Event",
+			"logged_in":               h.IsUserLoggedIn(c),
+			"header":                  "Event",
+			"event":                   event,
+			"event_type":              eventType,
+			"dives":                   dives,
+			"scores":                  diveScores,
+			"diveIDToUserEventDiveID": diveIDToUserEventDiveID,
+			"user":                    user,
+			"user_id":                 c.GetUint("user_id"),
+			"test_run":                os.Getenv("TEST_RUN") == "true",
+			"current_user":            h.IsCurrentUser(c, uint64(user.ID)),
+			"formatted_date":          formattedDate,
 		},
 	)
 }
@@ -417,4 +445,84 @@ func EventDelete(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", userID))
+}
+
+// EventScoreCreate creates a score for an event
+// Can have between 1 and 9 judge scores
+func EventScoreCreate(c *gin.Context) {
+	// Get the event ID from the URL
+	eventIDStr := c.Param("event_id")
+	eventID, err := strconv.ParseUint(eventIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	// Get the user ID from session claims
+	userID := uint64(c.MustGet("user_id").(uint))
+
+	// Check if it's a POST request (form submission)
+	if c.Request.Method == "POST" {
+		var postData struct {
+			UserID  uint64    `json:"userId"`
+			EventID uint64    `json:"eventId"`
+			DiveID  uint64    `json:"diveId"`
+			Scores  []float64 `json:"scores"`
+		}
+
+		if err := c.BindJSON(&postData); err != nil {
+			log.Printf("Error binding JSON data: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON data"})
+			return
+		}
+
+		// Save the scores to the database
+		for i, score := range postData.Scores {
+			err := models.ScoreCreate(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
+			if err != nil {
+				log.Printf("Error creating score: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create score"})
+				return
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Scores saved successfully"})
+
+		// Redirect to the event page
+		c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d/event/%d", userID, eventID))
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"events/show.html",
+		gin.H{
+			"title":        "Create Score",
+			"logged_in":    h.IsUserLoggedIn(c),
+			"header":       "Create Score",
+			"event_id":     eventID,
+			"test_run":     os.Getenv("TEST_RUN") == "true",
+			"user_id":      userID,
+			"current_user": h.IsCurrentUser(c, userID),
+		},
+	)
+}
+
+// FetchScores fetches scores for an event for the JS
+// and routes to /user/:user_id/event/:event_id/dive/:dive_id/scores
+func FetchScores(c *gin.Context) {
+	// Extract the IDs from the URL
+	userID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	eventID, _ := strconv.ParseUint(c.Param("event_id"), 10, 64)
+	diveID, _ := strconv.ParseUint(c.Param("dive_id"), 10, 64)
+
+	// Fetch the scores from the database
+	scores, err := models.FetchScores(userID, eventID, diveID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"scores": scores})
 }

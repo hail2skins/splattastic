@@ -22,5 +22,7 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.GET("/:id/event/:event_id/edit", middlewares.CheckCurrentUser(), controllers.EventEdit)
 		user.POST("/:id/event/:event_id", middlewares.CheckCurrentUser(), controllers.EventUpdate)
 		user.DELETE("/:id/event/:event_id", middlewares.CheckCurrentUser(), controllers.EventDelete)
+		user.POST("/:id/event/:event_id/scores", middlewares.CheckCurrentUser(), controllers.EventScoreCreate)
+		user.GET("/:id/event/:event_id/dive/:dive_id/scores", controllers.FetchScores)
 	}
 }
