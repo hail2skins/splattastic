@@ -20,10 +20,10 @@ type Score struct {
 }
 
 // ScoreCreate creates a score record can have between 1 and 9 judges
-func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value float64) error {
+func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value float64) (*Score, error) {
 	// Validation.  The math.Mod check ensures that the value is in increments of 0.5
 	if value < 0 || value > 10 || math.Mod(value*2, 1) != 0 {
-		return errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
+		return nil, errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
 	}
 	score := Score{
 		UserID:  userID,
@@ -34,9 +34,9 @@ func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value 
 	}
 	err := db.Database.Create(&score).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &score, nil
 }
 
 // FetchScores retrieves all the scores for a specific event for use with JS

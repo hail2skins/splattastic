@@ -479,7 +479,7 @@ func EventScoreCreate(c *gin.Context) {
 
 		// Save the scores to the database
 		for i, score := range postData.Scores {
-			err := models.ScoreCreate(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
+			_, err := models.ScoreCreate(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
 			if err != nil {
 				log.Printf("Error creating score: %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create score"})

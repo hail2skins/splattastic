@@ -1,19 +1,46 @@
-package models
+package controllers
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
 	"testing"
+	"text/template"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/hail2skins/splattastic/controllers"
 	"github.com/hail2skins/splattastic/controllers/helpers"
 	db "github.com/hail2skins/splattastic/database"
+	h "github.com/hail2skins/splattastic/helpers"
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestFetchScores tests the FetchScores function
+// TestFetchScores tests the FetchScores controller
 func TestFetchScores(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
+
+	// Create a router with the test route
+	funcMap := template.FuncMap{
+		"mod":     func(i, j int) int { return i % j }, // used to order checkboxes for dives
+		"shorten": h.Abbreviate,                        // used to abbreviate dive information. See helpers\abbreviate.go
+		"seq":     h.Seq,                               // used to generate a sequence of numbers for the event show page
+		"inc":     func(x int) int { return x + 1 },    // used to inc index on the event show page
+	}
+
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	router.SetFuncMap(funcMap)
+
+	router.LoadHTMLGlob("../../templates/**/**")
+	router.GET("/user/:id/event/:event_id/dive/:dive_id/scores", func(c *gin.Context) {
+		userID, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+		c.Set("user_id", uint(userID))
+		controllers.FetchScores(c)
+	})
 
 	// Insert test data and defer cleanup
 	dg1, dg2, dt1, dt2, bt1, bt2, bh1, bh2 := helpers.CreateTestData()
@@ -91,16 +118,43 @@ func TestFetchScores(t *testing.T) {
 		}
 	}
 
-	// FetchScores to test
-	scores, err := models.FetchScores(uint64(user.ID), uint64(event1.ID), uint64(dive.ID))
+	// Perform an HTTP GET request to the "/user/:id/event/:event_id/dive/:dive_id/scores" route
+	req, err := http.NewRequest("GET", "/user/"+strconv.FormatUint(uint64(user.ID), 10)+"/event/"+strconv.FormatUint(uint64(event1.ID), 10)+"/dive/"+strconv.FormatUint(uint64(dive.ID), 10)+"/scores", nil)
 	if err != nil {
-		t.Fatalf("Error fetching scores: %v", err)
+		t.Fatalf("Error creating request: %v", err)
 	}
 
-	// Check if FetchScores returned exactly 5 scores
-	if len(scores) != 5 {
-		t.Fatalf("Expected 5 scores, got %v", len(scores))
+	// Create a response recorder
+	w := httptest.NewRecorder()
+
+	// Perform the request
+	router.ServeHTTP(w, req)
+
+	// Check to see if the response was what you expected
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %v but got %v", http.StatusOK, w.Code)
 	}
+
+	// Parse the JSON response
+	var response map[string][]models.Score
+	errJson := json.Unmarshal(w.Body.Bytes(), &response)
+	if errJson != nil {
+		t.Fatalf("Error parsing JSON: %v", errJson)
+	}
+
+	// Check if the response contains the created scores
+	if len(response["scores"]) != len(validScores) {
+		t.Fatalf("Expected %v scores but got %v", len(validScores), len(response["scores"]))
+	}
+	for i, score := range response["scores"] {
+		if score.Value != validScores[i] {
+			t.Fatalf("Expected score value %v but got %v", validScores[i], score.Value)
+		}
+	}
+
+	// Get all scores for the dive
+	scores := []models.Score{}
+	db.Database.Unscoped().Where("dive_id = ?", dive.ID).Find(&scores)
 
 	// Delete all scores for the dive
 	for _, score := range scores {

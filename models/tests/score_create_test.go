@@ -85,7 +85,7 @@ func TestScoreCreate(t *testing.T) {
 
 	// Create scores for the dive
 	for i, scoreValue := range validScores {
-		err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err != nil {
 			t.Fatalf("Error creating valid score: %v", err)
 		}
@@ -99,7 +99,7 @@ func TestScoreCreate(t *testing.T) {
 
 	// Create scores for the dive
 	for i, scoreValue := range invalidScores {
-		err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err == nil {
 			t.Fatalf("Expected error creating invalid score, got nil")
 		}
