@@ -1,9 +1,15 @@
 let scoresData = {};
+let forceRefresh = false;
 
 function loadScores(diveId) {
     console.log("Loading scores for dive:", diveId);
     const userId = document.querySelector('#scoreForm input[name="userId"]').value;
     const eventId = document.querySelector('#scoreForm input[name="eventId"]').value;
+
+    // If forceRefresh is true, clear the scores data for the dive
+    if (forceRefresh) {
+        scoresData[diveId] = null;
+    }
 
     if (!scoresData[diveId]) {
         scoresData[diveId] = { scores: [] };
@@ -87,19 +93,25 @@ document.addEventListener("DOMContentLoaded", function() {
             modalInstance.hide();
             scoreForm.reset();
 
-            // Update the scores on the page
+            // Set the force refresh flag and reload the scores
+            forceRefresh = true;
+            loadScores(diveId);
+
             scores.forEach(function(score, index) {
-                const scoreElement = document.querySelector(`[data-dive-id="${diveId}"] [data-score-index="${index + 1}"]`);
+                // Select the parent container for the current score index
+                const parentContainer = document.querySelector(`[data-dive-id="${diveId}"][data-score-index="${index + 1}"]`);
+                
+                const scoreElement = parentContainer.querySelector(".score");
                 if (scoreElement) {
                     scoreElement.textContent = score.toFixed(2);
                 } else {
                     const newScoreElement = document.createElement("div");
+                    newScoreElement.classList.add("score");  // Add the 'score' class
                     newScoreElement.textContent = score.toFixed(2);
-                    newScoreElement.setAttribute("data-dive-id", diveId);
-                    newScoreElement.setAttribute("data-score-index", index + 1);
-                    scoreElement.parentNode.insertBefore(newScoreElement, scoreElement);
+                    parentContainer.appendChild(newScoreElement);
                 }
             });
+            
 
             // Hide the error alert
             errorAlert.style.display = "none";
