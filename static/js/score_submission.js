@@ -65,7 +65,15 @@ document.addEventListener("DOMContentLoaded", function() {
         for (let i = 1; i <= 9; i++) {
             const score = formData.get("score" + i);
             if (score) {
-                scores.push(parseFloat(score));
+                // Validation: scores must be between 0 and 10 and in increments of 0.5
+                const floatScore = parseFloat(score);
+                if (floatScore < 0 || floatScore > 10 || floatScore * 2 % 1 !== 0) {
+                    // Invalid score - show error message and return to prevent form submission
+                    errorAlert.textContent = "Scores must be between 0 and 10 and in increments of 0.5.";
+                    errorAlert.style.display = "block";
+                    return;
+                }
+                scores.push(floatScore);
             }
         }
 
