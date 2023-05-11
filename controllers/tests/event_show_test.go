@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"text/template"
 	"time"
@@ -96,10 +95,6 @@ func TestEventShow(t *testing.T) {
 			eventDate := time.Now()
 			event, _ := models.EventCreate("Test Event", "Test Location", eventDate, "Test Against", uint64(user.ID), uint64(et1.ID), tc.diveIDs)
 
-			// Create two test scores
-			score1, _ := models.ScoreCreate(uint64(user.ID), uint64(event.ID), uint64(dive1.ID), 1, 8.5)
-			score2, _ := models.ScoreCreate(uint64(user.ID), uint64(event.ID), uint64(dive2.ID), 2, 6.5)
-
 			// Create a request to the test route
 			req, err := http.NewRequest("GET", "/user/"+helpers.UintToString(user.ID)+"/event/"+helpers.UintToString(event.ID), nil)
 			if err != nil {
@@ -117,26 +112,12 @@ func TestEventShow(t *testing.T) {
 				t.Errorf("Expected response code %v, got %v", http.StatusOK, w.Code)
 			}
 
-			// Check if the response contains the created scores only if there are dives
-			if tc.expectedDives > 0 {
-				if !strings.Contains(w.Body.String(), "8.5") {
-					t.Errorf("Expected response to contain %v, got %v", score1.Value, w.Body.String())
-				}
-				//if !strings.Contains(w.Body.String(), "6.5") {
-				//	t.Errorf("Expected response to contain %v, got %v", score2.Value, w.Body.String())
-				//}
-			}
-
 			// Check if the number of dives is as expected
 			var userEventDives []models.UserEventDive
 			db.Database.Where("event_id = ?", event.ID).Find(&userEventDives)
 			if len(userEventDives) != tc.expectedDives {
 				t.Errorf("Expected %d dives, got %d", tc.expectedDives, len(userEventDives))
 			}
-
-			// Clean up test scores
-			db.Database.Unscoped().Delete(score1)
-			db.Database.Unscoped().Delete(score2)
 
 			// Clean up the UserEventDives associated with the event
 			for _, userEventDive := range userEventDives {

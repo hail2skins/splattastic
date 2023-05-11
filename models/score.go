@@ -60,3 +60,26 @@ func FetchScores(userID uint64, eventID uint64, diveID uint64) ([]Score, error) 
 
 	return scores, nil
 }
+
+// ScoreUpdate updates an existing score record
+func ScoreUpdate(userID uint64, eventID uint64, diveID uint64, judge int, value float64) (*Score, error) {
+	// Validation.  The math.Mod check ensures that the value is in increments of 0.5
+	if value < 0 || value > 10 || math.Mod(value*2, 1) != 0 {
+		return nil, errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
+	}
+
+	// Check if a score from the same judge for the same dive already exists
+	var existingScore Score
+	if err := db.Database.Where("user_id = ? AND event_id = ? AND dive_id = ? AND judge = ?", userID, eventID, diveID, judge).First(&existingScore).Error; err != nil {
+		// If the error is gorm.ErrRecordNotFound, then a score from this judge for this dive does not exist
+		return nil, errors.New("A score from this judge for this dive does not exist.")
+	}
+
+	// Update the score
+	existingScore.Value = value
+	if err := db.Database.Save(&existingScore).Error; err != nil {
+		return nil, err
+	}
+
+	return &existingScore, nil
+}

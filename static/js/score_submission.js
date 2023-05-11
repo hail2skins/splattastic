@@ -9,6 +9,7 @@ function loadScores(diveId) {
     // If forceRefresh is true, clear the scores data for the dive
     if (forceRefresh) {
         scoresData[diveId] = null;
+        forceRefresh = false; // Reset the flag
     }
 
     if (!scoresData[diveId]) {
@@ -23,6 +24,8 @@ function loadScores(diveId) {
             })
             .then(function (data) {
                 console.log("Fetched scores:", data);
+                // Clear the scores array before adding new scores
+                scoresData[diveId].scores = [];
                 scoresData[diveId].scores = data.scores;
                 updateScores(diveId);
             })
@@ -35,22 +38,33 @@ function loadScores(diveId) {
 }
 
 function updateScores(diveId) {
+    // First, remove any existing scores from the DOM
+    const scoreElements = document.querySelectorAll(`[data-dive-id="${diveId}"] .score`);
+    scoreElements.forEach(function (scoreElement) {
+        scoreElement.remove();
+    });
+
+    // Then add the new scores
     scoresData[diveId].scores.forEach(function (scoreObject, index) {
         const score = scoreObject.score;
         const judge = scoreObject.judge; // Assuming scoreObject contains a judge field
-        const scoreElement = document.querySelector(`[data-dive-id="${diveId}"] .score${index + 1}`);
-        if (scoreElement) {
-            scoreElement.textContent = score.toFixed(2);
-        }
+
+        // Create a new score element and add it to the DOM
+        const parentContainer = document.querySelector(`[data-dive-id="${diveId}"][data-score-index="${index + 1}"]`);
+        const newScoreElement = document.createElement("div");
+        newScoreElement.classList.add("score");  // Add the 'score' class
+        newScoreElement.textContent = score.toFixed(2);
+        parentContainer.appendChild(newScoreElement);
 
         // Update and disable the corresponding input field in the modal
         const scoreInput = document.querySelector(`#scoreForm input[name="score${judge}"]`);
         if (scoreInput) {
             scoreInput.value = score.toFixed(2);
-            scoreInput.disabled = true;
         }
     });
 }
+
+
 
 document.addEventListener("DOMContentLoaded", function() {
     const scoreForm = document.getElementById("scoreForm");
@@ -86,7 +100,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         // Send a request to the server to save the scores
-        fetch(`/user/${userId}/event/${eventId}/scores`, {
+        // Use different URLs for creating and updating scores
+        const url = scoresData[diveId].scores.length > 0
+            ? `/user/${userId}/event/${eventId}/dive/${diveId}` // Update scores
+            : `/user/${userId}/event/${eventId}/scores`; // Create scores
+        fetch(url, {
             method: "POST",
             body: JSON.stringify({
                 userId: userId,
@@ -147,9 +165,6 @@ addScoreButtons.forEach(function(button) {
         scoreForm.reset();
         for (let i = 1; i <= 9; i++) {
             const scoreInput = document.querySelector(`#scoreForm input[name="score${i}"]`);
-            if (scoreInput) {
-                scoreInput.disabled = false;
-            }
         }
 
         const diveId = button.getAttribute("data-dive-id");
