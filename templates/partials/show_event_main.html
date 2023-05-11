@@ -40,12 +40,12 @@
                                                             {{$i}}
                                                         </div>
                                                         <div class="border text-center score{{ $i }}" data-dive-id="{{ $dive.ID }}" data-score-index="{{ $i }}">
-                                                            <!-- Possible score goes here -->
-                                                            {{range $score := index $.scores $dive.ID}}
-                                                                {{if eq $score.Judge $i}}
-                                                                    {{$score.Value}}
-                                                                {{ end }}
-                                                            {{ end }}
+                                                            <!-- Possible score goes here. Below is only needed if we render through event show and add back in brackets if needed.-->
+                                                            <!-- range $score := index $.scores $dive.ID
+                                                                if eq $score.Judge $i
+                                                                    $score.Value
+                                                                 end 
+                                                             end -->
                                                         </div>
                                                     </div>
                                                 {{end}}
@@ -64,7 +64,7 @@
                                                 <div class="col">
                                                     <h5>
                                                     <button type="button" class="btn btn-primary add-score" data-bs-toggle="modal" data-bs-target="#scoreModal" data-dive-id="{{ $dive.ID }}" data-user-event-dive-id="{{ index $.diveIDToUserEventDiveID $dive.ID }}">
-                                                        Add Score
+                                                        Add/Update Score
                                                     </button>
                                                     </h5>
                                                 </div>
