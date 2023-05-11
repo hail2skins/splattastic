@@ -112,7 +112,7 @@ func TestFetchScores(t *testing.T) {
 
 	// Create scores for the dive
 	for i, scoreValue := range validScores {
-		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err != nil {
 			t.Fatalf("Error creating valid score: %v", err)
 		}

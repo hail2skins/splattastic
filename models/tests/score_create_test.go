@@ -9,8 +9,8 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestScoreCreate tests the ScoreCreate function
-func TestScoreCreate(t *testing.T) {
+// TestScoreUpsert tests the ScoreUpsert function
+func TestScoreUpsert(t *testing.T) {
 	// Setup
 	LoadEnv()
 	db.Connect()
@@ -85,7 +85,7 @@ func TestScoreCreate(t *testing.T) {
 
 	// Create scores for the dive
 	for i, scoreValue := range validScores {
-		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err != nil {
 			t.Fatalf("Error creating valid score: %v", err)
 		}
@@ -93,7 +93,7 @@ func TestScoreCreate(t *testing.T) {
 
 	// Add the same 5 valid scores for the same dive to ensure we get an error
 	for i, scoreValue := range validScores {
-		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err == nil {
 			t.Fatalf("Expected error creating duplicate score, got nil")
 		}
@@ -107,7 +107,7 @@ func TestScoreCreate(t *testing.T) {
 
 	// Create scores for the dive
 	for i, scoreValue := range invalidScores {
-		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err == nil {
 			t.Fatalf("Expected error creating invalid score, got nil")
 		}

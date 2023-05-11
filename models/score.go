@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 
 	db "github.com/hail2skins/splattastic/database"
 	"gorm.io/gorm"
@@ -19,8 +20,8 @@ type Score struct {
 	Value         float64       `json:"score"`
 }
 
-// ScoreCreate creates a score record can have between 1 and 9 judges
-func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value float64) (*Score, error) {
+// ScoreUpsert creates a new score record or updates an existing one
+func ScoreUpsert(userID uint64, eventID uint64, diveID uint64, judge int, value float64) (*Score, error) {
 	// Validation.  The math.Mod check ensures that the value is in increments of 0.5
 	if value < 0 || value > 10 || math.Mod(value*2, 1) != 0 {
 		return nil, errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
@@ -28,23 +29,34 @@ func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value 
 
 	// Check if a score from the same judge for the same dive already exists
 	var existingScore Score
-	if err := db.Database.Where("user_id = ? AND event_id = ? AND dive_id = ? AND judge = ?", userID, eventID, diveID, judge).First(&existingScore).Error; err != gorm.ErrRecordNotFound {
-		// If the error is not gorm.ErrRecordNotFound, then a score from this judge for this dive already exists
-		return nil, errors.New("A score from this judge for this dive already exists.")
-	}
+	err := db.Database.Where("user_id = ? AND event_id = ? AND dive_id = ? AND judge = ?", userID, eventID, diveID, judge).First(&existingScore).Error
 
-	score := Score{
-		UserID:  userID,
-		EventID: eventID,
-		DiveID:  diveID,
-		Judge:   judge,
-		Value:   value,
-	}
-	err := db.Database.Create(&score).Error
-	if err != nil {
+	if err == gorm.ErrRecordNotFound {
+		// Create a new score
+		score := Score{
+			UserID:  userID,
+			EventID: eventID,
+			DiveID:  diveID,
+			Judge:   judge,
+			Value:   value,
+		}
+		err := db.Database.Create(&score).Error
+		if err != nil {
+			return nil, err
+		}
+		return &score, nil
+	} else if err != nil {
+		// If the error is not gorm.ErrRecordNotFound, then there was a different error
 		return nil, err
+	} else {
+		// Update the existing score
+		existingScore.Value = value
+		err = db.Database.Save(&existingScore).Error
+		if err != nil {
+			return nil, err
+		}
+		return &existingScore, nil
 	}
-	return &score, nil
 }
 
 // FetchScores retrieves all the scores for a specific event for use with JS
@@ -61,25 +73,43 @@ func FetchScores(userID uint64, eventID uint64, diveID uint64) ([]Score, error) 
 	return scores, nil
 }
 
-// ScoreUpdate updates an existing score record
-func ScoreUpdate(userID uint64, eventID uint64, diveID uint64, judge int, value float64) (*Score, error) {
-	// Validation.  The math.Mod check ensures that the value is in increments of 0.5
-	if value < 0 || value > 10 || math.Mod(value*2, 1) != 0 {
-		return nil, errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
+// CalculateDiveScore calculates the total score for a dive based on FINA dive rules
+// We may want to move total score to a separate table for retrieval and use elsewhere in the application
+// But this is called from the EventShow page for now as dives are entered using the JS.
+func CalculateDiveScore(diveID uint64) (float64, error) {
+	var scores []Score
+	var dive Dive
+
+	if err := db.Database.Where("dive_id = ?", diveID).Find(&scores).Error; err != nil {
+		return 0, err
 	}
 
-	// Check if a score from the same judge for the same dive already exists
-	var existingScore Score
-	if err := db.Database.Where("user_id = ? AND event_id = ? AND dive_id = ? AND judge = ?", userID, eventID, diveID, judge).First(&existingScore).Error; err != nil {
-		// If the error is gorm.ErrRecordNotFound, then a score from this judge for this dive does not exist
-		return nil, errors.New("A score from this judge for this dive does not exist.")
+	if err := db.Database.First(&dive, diveID).Error; err != nil {
+		return 0, err
 	}
 
-	// Update the score
-	existingScore.Value = value
-	if err := db.Database.Save(&existingScore).Error; err != nil {
-		return nil, err
+	// Sort the scores
+	sort.Slice(scores, func(i, j int) bool {
+		return scores[i].Value < scores[j].Value
+	})
+
+	var totalScore float64
+	switch len(scores) {
+	case 3:
+		for _, score := range scores {
+			totalScore += score.Value
+		}
+	case 5:
+		for _, score := range scores[1:4] {
+			totalScore += score.Value
+		}
+	case 7:
+		for _, score := range scores[2:5] {
+			totalScore += score.Value
+		}
+	default:
+		return 0, errors.New("Invalid number of scores")
 	}
 
-	return &existingScore, nil
+	return totalScore * float64(dive.Difficulty), nil
 }

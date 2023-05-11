@@ -28,6 +28,26 @@ function loadScores(diveId) {
                 scoresData[diveId].scores = [];
                 scoresData[diveId].scores = data.scores;
                 updateScores(diveId);
+
+                // Fetch and display the total score if there are 3, 5, or 7 scores
+                if ([3, 5, 7].includes(data.scores.length)) {
+                    fetch(`/user/${userId}/event/${eventId}/dive/${diveId}/total`, {
+                        method: "GET"
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display the total score
+                        const totalScoreElement = document.querySelector(`.dive-${diveId} .total-score`);
+                        if (totalScoreElement) {
+                            totalScoreElement.textContent = data.score.toFixed(2);
+                        } else {
+                            const newTotalScoreElement = document.createElement("div");
+                            newTotalScoreElement.classList.add("total-score");
+                            newTotalScoreElement.textContent = data.score.toFixed(2);
+                            document.querySelector(`[data-dive-id="${diveId}"]`).appendChild(newTotalScoreElement);
+                        }
+                    });
+                }
             })
             .catch(function (error) {
                 console.error('Error fetching scores:', error);
@@ -100,10 +120,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         // Send a request to the server to save the scores
-        // Use different URLs for creating and updating scores
-        const url = scoresData[diveId].scores.length > 0
-            ? `/user/${userId}/event/${eventId}/dive/${diveId}` // Update scores
-            : `/user/${userId}/event/${eventId}/scores`; // Create scores
+        
+        const url = `/user/${userId}/event/${eventId}/scores`; // Creates or updates through ScoreUpsert in score model
         fetch(url, {
             method: "POST",
             body: JSON.stringify({
@@ -131,6 +149,14 @@ document.addEventListener("DOMContentLoaded", function() {
             forceRefresh = true;
             loadScores(diveId);
 
+            // Update total score in the DOM
+            const totalScoreElement = document.querySelector(`.dive-${diveId} .total-score`);
+            if (data.total_score) {
+                totalScoreElement.textContent = data.total_score.toFixed(2);
+            } else {
+                totalScoreElement.textContent = ''; // Clear the total score if not available
+            }
+
             scores.forEach(function(score, index) {
                 // Select the parent container for the current score index
                 const parentContainer = document.querySelector(`[data-dive-id="${diveId}"][data-score-index="${index + 1}"]`);
@@ -145,6 +171,26 @@ document.addEventListener("DOMContentLoaded", function() {
                     parentContainer.appendChild(newScoreElement);
                 }
             });
+
+            // If there are 3, 5, or 7 scores, calculate the total score
+            if ([3, 5, 7].includes(scores.length)) {
+                fetch(`/user/${userId}/event/${eventId}/dive/${diveId}/total`, {
+                    method: "GET"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Display the total score
+                    const totalScoreElement = document.querySelector(`.dive-${diveId} .total-score`);
+                    if (totalScoreElement) {
+                        totalScoreElement.textContent = data.score.toFixed(2);
+                    } else {
+                        const newTotalScoreElement = document.createElement("div");
+                        newTotalScoreElement.classList.add("total-score");
+                        newTotalScoreElement.textContent = data.score.toFixed(2);
+                        document.querySelector(`[data-dive-id="${diveId}"]`).appendChild(newTotalScoreElement);
+                    }
+                });
+            }
             
 
             // Hide the error alert

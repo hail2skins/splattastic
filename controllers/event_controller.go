@@ -449,7 +449,7 @@ func EventDelete(c *gin.Context) {
 
 // EventScoreCreate creates a score for an event
 // Can have between 1 and 9 judge scores
-func EventScoreCreate(c *gin.Context) {
+func EventScoreUpsert(c *gin.Context) {
 	// Get the event ID from the URL
 	eventIDStr := c.Param("event_id")
 	eventID, err := strconv.ParseUint(eventIDStr, 10, 64)
@@ -479,7 +479,7 @@ func EventScoreCreate(c *gin.Context) {
 
 		// Save the scores to the database
 		for i, score := range postData.Scores {
-			_, err := models.ScoreCreate(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
+			_, err := models.ScoreUpsert(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
 			if err != nil {
 				log.Printf("Error creating score: %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create score"})
@@ -527,63 +527,24 @@ func FetchScores(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"scores": scores})
 }
 
-// EventScoreUpdate updates a score for an event
-func EventScoreUpdate(c *gin.Context) {
-	// Get the event ID from the URL
-	eventIDStr := c.Param("event_id")
-	eventID, err := strconv.ParseUint(eventIDStr, 10, 64)
+// EventDiveScore calculates the score for a dive in an event
+func EventDiveScoreTotal(c *gin.Context) {
+	// Get the dive ID from the URL
+	diveIDStr := c.Param("dive_id")
+	diveID, err := strconv.ParseUint(diveIDStr, 10, 64)
 	if err != nil {
-		log.Printf("Error converting event ID to uint64: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		log.Printf("Error converting dive ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid dive ID"})
 		return
 	}
 
-	// Get the user ID from session claims
-	userID := uint64(c.MustGet("user_id").(uint))
-
-	// Check if it's a POST request (form submission)
-	if c.Request.Method == "POST" {
-		var postData struct {
-			UserID  uint64    `json:"userId"`
-			EventID uint64    `json:"eventId"`
-			DiveID  uint64    `json:"diveId"`
-			Scores  []float64 `json:"scores"`
-		}
-
-		if err := c.BindJSON(&postData); err != nil {
-			log.Printf("Error binding JSON data: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON data"})
-			return
-		}
-
-		// Save the scores to the database
-		for i, score := range postData.Scores {
-			_, err := models.ScoreUpdate(postData.UserID, postData.EventID, postData.DiveID, i+1, score)
-			if err != nil {
-				log.Printf("Error creating score: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create score"})
-				return
-			}
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "Scores saved successfully"})
-
-		// Redirect to the event page
-		c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d/event/%d", userID, eventID))
+	// Total the scores
+	total, err := models.CalculateDiveScore(diveID)
+	if err != nil {
+		log.Printf("Error calculating dive score: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error calculating dive score"})
 		return
 	}
 
-	c.HTML(
-		http.StatusOK,
-		"events/show.html",
-		gin.H{
-			"title":        "Update Score",
-			"logged_in":    h.IsUserLoggedIn(c),
-			"header":       "Update Score",
-			"event_id":     eventID,
-			"test_run":     os.Getenv("TEST_RUN") == "true",
-			"user_id":      userID,
-			"current_user": h.IsCurrentUser(c, userID),
-		},
-	)
+	c.JSON(http.StatusOK, gin.H{"score": total})
 }
