@@ -25,6 +25,14 @@ func ScoreCreate(userID uint64, eventID uint64, diveID uint64, judge int, value 
 	if value < 0 || value > 10 || math.Mod(value*2, 1) != 0 {
 		return nil, errors.New("Invalid score value. Score must be between 0 and 10 and in increments of 0.5.")
 	}
+
+	// Check if a score from the same judge for the same dive already exists
+	var existingScore Score
+	if err := db.Database.Where("user_id = ? AND event_id = ? AND dive_id = ? AND judge = ?", userID, eventID, diveID, judge).First(&existingScore).Error; err != gorm.ErrRecordNotFound {
+		// If the error is not gorm.ErrRecordNotFound, then a score from this judge for this dive already exists
+		return nil, errors.New("A score from this judge for this dive already exists.")
+	}
+
 	score := Score{
 		UserID:  userID,
 		EventID: eventID,

@@ -36,10 +36,18 @@ function loadScores(diveId) {
 
 function updateScores(diveId) {
     scoresData[diveId].scores.forEach(function (scoreObject, index) {
-        const score = scoreObject.Value;
+        const score = scoreObject.score;
+        const judge = scoreObject.judge; // Assuming scoreObject contains a judge field
         const scoreElement = document.querySelector(`[data-dive-id="${diveId}"] .score${index + 1}`);
         if (scoreElement) {
             scoreElement.textContent = score.toFixed(2);
+        }
+
+        // Update and disable the corresponding input field in the modal
+        const scoreInput = document.querySelector(`#scoreForm input[name="score${judge}"]`);
+        if (scoreInput) {
+            scoreInput.value = score.toFixed(2);
+            scoreInput.disabled = true;
         }
     });
 }
@@ -131,15 +139,26 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Set the dive ID in the form when the Add Score button is clicked
-    const addScoreButtons = document.querySelectorAll(".add-score");
-    addScoreButtons.forEach(function(button) {
-        button.addEventListener("click", function() {
-            const diveId = button.getAttribute("data-dive-id");
-            console.log("Add Score button clicked, diveId:", diveId); // Add this line
-            scoreForm.querySelector("#diveId").value = diveId;
-        });
+// Set the dive ID in the form when the Add Score button is clicked
+const addScoreButtons = document.querySelectorAll(".add-score");
+addScoreButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        // Clear the form and enable all input fields
+        scoreForm.reset();
+        for (let i = 1; i <= 9; i++) {
+            const scoreInput = document.querySelector(`#scoreForm input[name="score${i}"]`);
+            if (scoreInput) {
+                scoreInput.disabled = false;
+            }
+        }
+
+        const diveId = button.getAttribute("data-dive-id");
+        console.log("Add Score button clicked, diveId:", diveId); // Add this line
+        scoreForm.querySelector("#diveId").value = diveId;
+        loadScores(diveId); // Refresh the scores for the selected dive
     });
+});
+
 
     // Load scores for all dives
     document.querySelectorAll('[data-dive-id]').forEach(function (element) {

@@ -91,6 +91,14 @@ func TestScoreCreate(t *testing.T) {
 		}
 	}
 
+	// Add the same 5 valid scores for the same dive to ensure we get an error
+	for i, scoreValue := range validScores {
+		_, err = models.ScoreCreate(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		if err == nil {
+			t.Fatalf("Expected error creating duplicate score, got nil")
+		}
+	}
+
 	// Add 5 invalid scores for a dive
 	invalidScores := make([]float64, 5)
 	for i := range invalidScores {
