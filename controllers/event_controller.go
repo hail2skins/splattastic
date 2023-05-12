@@ -548,3 +548,26 @@ func EventDiveScoreTotal(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"score": total})
 }
+
+// EventMeetScore calculates the score for a meet, adding up all the dive scores
+func EventMeetScore(c *gin.Context) {
+	// Get the event ID from the URL
+	eventIDStr := c.Param("event_id")
+	eventID, err := strconv.ParseUint(eventIDStr, 10, 64)
+	if err != nil {
+		log.Printf("Error converting event ID to uint64: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	// Total the meet score
+	meetScore, err := models.CalculateMeetScore(eventID)
+	if err != nil {
+		log.Printf("Error calculating meet score: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error calculating meet score"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"score": meetScore})
+
+}

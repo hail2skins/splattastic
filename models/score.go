@@ -76,6 +76,8 @@ func FetchScores(userID uint64, eventID uint64, diveID uint64) ([]Score, error) 
 // CalculateDiveScore calculates the total score for a dive based on FINA dive rules
 // We may want to move total score to a separate table for retrieval and use elsewhere in the application
 // But this is called from the EventShow page for now as dives are entered using the JS.
+var ErrInvalidScores = errors.New("Invalid number of scores for dive")
+
 func CalculateDiveScore(diveID uint64) (float64, error) {
 	var scores []Score
 	var dive Dive
@@ -108,8 +110,30 @@ func CalculateDiveScore(diveID uint64) (float64, error) {
 			totalScore += score.Value
 		}
 	default:
-		return 0, errors.New("Invalid number of scores")
+		return 0, ErrInvalidScores
 	}
 
 	return totalScore * float64(dive.Difficulty), nil
+}
+
+func CalculateMeetScore(eventID uint64) (float64, error) {
+	// Get all dives for this user and event
+	dives, err := GetDivesForEvent(eventID)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalScore float64 = 0
+	for _, dive := range dives {
+		diveScore, err := CalculateDiveScore(uint64(dive.ID))
+		if err != nil {
+			if err == ErrInvalidScores {
+				continue // Skip this dive
+			}
+			return 0, err
+		}
+		totalScore += diveScore
+	}
+
+	return totalScore, nil
 }

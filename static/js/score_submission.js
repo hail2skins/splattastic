@@ -46,6 +46,23 @@ function loadScores(diveId) {
                             newTotalScoreElement.textContent = data.score.toFixed(2);
                             document.querySelector(`[data-dive-id="${diveId}"]`).appendChild(newTotalScoreElement);
                         }
+
+                        // Fetch and display the meet score
+                        fetch(`/user/${userId}/event/${eventId}/meet_score`, {
+                            method: "GET"
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Display the meet score
+                            const meetScoreElement = document.querySelector("#meetScore");
+                            if (meetScoreElement) {
+                                if (data.score === null || data.score === undefined) {
+                                    meetScoreElement.textContent = "No dives scored yet";
+                                } else {
+                                    meetScoreElement.textContent = data.score.toFixed(2);
+                                }
+                            }
+                        });
                     });
                 }
             })

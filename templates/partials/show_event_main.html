@@ -13,8 +13,19 @@
                                 <p class="card-text"><b>Against:</b> {{ .event.Against }}</p>
                                 <p class="card-text"><b>Event Type:</b> {{ .event.EventType.Name }}</p>
                             </div>
-                    </div>                    
-                </div>
+                        </div>  
+                        <div class="card">
+                            <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+                                <div class="card-header">Meet Score</div>
+                                <div class="card-body">
+                                <h5 class="card-title" id="meetScore"> <!-- Meet Score Goes HERE --> No dives scored yet</h5>
+                                
+                                </div>
+                            </div>
+                        </div>                  
+                    </div>
+                
+                                
                 <div class="col-md-8">
                     <div class="accordion" id="dives">
                         {{if .dives}}
@@ -146,6 +157,7 @@
     </div>
   </div>
                 
+        
         <div class="container px-4 px-lg-5">
         {{ if or .current_user .test_run }}
         <a class="btn btn-outline-primary" href="/user/{{ .user.ID }}/event/{{ .event.ID }}/edit" role="button">Edit</a>

@@ -25,5 +25,6 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.POST("/:id/event/:event_id/scores", middlewares.CheckCurrentUser(), controllers.EventScoreUpsert)
 		user.GET("/:id/event/:event_id/dive/:dive_id/scores", controllers.FetchScores)
 		user.GET("/:id/event/:event_id/dive/:dive_id/total", controllers.EventDiveScoreTotal)
+		user.GET("/:id/event/:event_id/meet_score", controllers.EventMeetScore)
 	}
 }
