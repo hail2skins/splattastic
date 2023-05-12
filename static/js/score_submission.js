@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Get scores from the form data
         const scores = [];
-        for (let i = 1; i <= 9; i++) {
+        for (let i = 1; i <= 7; i++) {
             const score = formData.get("score" + i);
             if (score) {
                 // Validation: scores must be between 0 and 10 and in increments of 0.5
@@ -226,7 +226,7 @@ addScoreButtons.forEach(function(button) {
     button.addEventListener("click", function() {
         // Clear the form and enable all input fields
         scoreForm.reset();
-        for (let i = 1; i <= 9; i++) {
+        for (let i = 1; i <= 7; i++) {
             const scoreInput = document.querySelector(`#scoreForm input[name="score${i}"]`);
         }
 
