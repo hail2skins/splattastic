@@ -77,26 +77,61 @@ func TestScoreUpsert(t *testing.T) {
 		t.Fatalf("Error creating event with 1 dive: %v", err)
 	}
 
-	// Add 5 valid scores for a dive
-	validScores := make([]float64, 5)
+	// Add 3 valid scores for a dive
+	// This should create three scores
+	validScores := make([]float64, 3)
 	for i := range validScores {
 		validScores[i] = 8.5 // or any valid score
 	}
-
-	// Create scores for the dive
+	// Loop through the valid scores and create them
 	for i, scoreValue := range validScores {
 		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
 		if err != nil {
 			t.Fatalf("Error creating valid score: %v", err)
 		}
 	}
+	// Get all scores for the dive
+	checkScores := []models.Score{}
+	db.Database.Unscoped().Where("dive_id = ?", dive.ID).Find(&checkScores)
 
-	// Add the same 5 valid scores for the same dive to ensure we get an error
-	for i, scoreValue := range validScores {
-		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
-		if err == nil {
-			t.Fatalf("Expected error creating duplicate score, got nil")
+	// Check that there are three scores with the expected value
+	expectedValue := 8.5
+	count := 0
+	for _, score := range checkScores {
+		if score.Value == expectedValue {
+			count++
 		}
+	}
+	if count != 3 {
+		t.Fatalf("Expected 3 scores with value %v, got %v", expectedValue, count)
+	}
+
+	// Map 5 different valid scores for the same dive
+	// Here we want to update the scores to 7.5 for the first 5 judges changing the first three from 8.5 to 7.5
+	updatedScores := make([]float64, 5)
+	for i := range updatedScores {
+		updatedScores[i] = 7.5 // or any valid score
+	}
+	for i, scoreValue := range updatedScores {
+		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
+		if err != nil {
+			t.Fatalf("Error creating valid score: %v", err)
+		}
+	}
+	// Get all scores for the dive
+	checkScores = []models.Score{}
+	db.Database.Unscoped().Where("dive_id = ?", dive.ID).Find(&checkScores)
+
+	// Check that there are five scores with the expected value
+	expectedValue = 7.5
+	count = 0
+	for _, score := range checkScores {
+		if score.Value == expectedValue {
+			count++
+		}
+	}
+	if count != 5 {
+		t.Fatalf("Expected 5 scores with value %v, got %v", expectedValue, count)
 	}
 
 	// Add 5 invalid scores for a dive
@@ -104,7 +139,6 @@ func TestScoreUpsert(t *testing.T) {
 	for i := range invalidScores {
 		invalidScores[i] = 11 // or any invalid score
 	}
-
 	// Create scores for the dive
 	for i, scoreValue := range invalidScores {
 		_, err = models.ScoreUpsert(uint64(userID), uint64(event1.ID), uint64(dive.ID), i+1, scoreValue)
