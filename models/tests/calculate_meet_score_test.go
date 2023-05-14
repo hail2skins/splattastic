@@ -142,11 +142,22 @@ func TestCalculateMeetScore(t *testing.T) {
 		}
 	}
 
-	// Get all scores for the dives
+	// Get all scores for the dive
 	scores := []models.Score{}
 	db.Database.Unscoped().Where("dive_id = ?", dive.ID).Find(&scores)
+
+	// Delete all scores for the dive
+	for _, score := range scores {
+		db.Database.Unscoped().Delete(&score)
+	}
+	// Get all scores for the other dive
 	scores1 := []models.Score{}
 	db.Database.Unscoped().Where("dive_id = ?", dive2.ID).Find(&scores1)
+
+	// Delete all scores for the other dive
+	for _, score1 := range scores1 {
+		db.Database.Unscoped().Delete(&score1)
+	}
 
 	// Delete User Event Dive
 	models.DeleteUserEventDivesByEventID(event1.ID)
