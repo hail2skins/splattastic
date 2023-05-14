@@ -447,8 +447,8 @@ func EventDelete(c *gin.Context) {
 	c.Redirect(http.StatusFound, fmt.Sprintf("/user/%d", userID))
 }
 
-// EventScoreCreate creates a score for an event
-// Can have between 1 and 9 judge scores
+// EventScoreUpsert creates a score for an event
+// Can have between 1 and 7 judge scores
 func EventScoreUpsert(c *gin.Context) {
 	// Get the event ID from the URL
 	eventIDStr := c.Param("event_id")
