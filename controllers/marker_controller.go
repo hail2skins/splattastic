@@ -89,3 +89,34 @@ func MarkerShow(c *gin.Context) {
 		},
 	)
 }
+
+// MarkerEdit is a controller for the marker edit page
+func MarkerEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	marker, err := models.MarkerShow(id)
+	if err != nil {
+		log.Printf("Error getting marker: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"markers/edit.html",
+		gin.H{
+			"title":     "Edit Marker",
+			"header":    "Edit Marker",
+			"logged_in": h.IsUserLoggedIn(c),
+			"marker":    marker,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
