@@ -30,3 +30,14 @@ func MarkerCreate(name string) (*Marker, error) {
 	log.Printf("Marker created: %v", marker)
 	return &marker, nil
 }
+
+// MarkersGet is a function which will get all Markers
+func MarkersGet() ([]Marker, error) {
+	var markers []Marker
+	result := db.Database.Find(&markers)
+	if result.Error != nil {
+		log.Printf("Error getting markers: %v", result.Error)
+		return nil, result.Error
+	}
+	return markers, nil
+}

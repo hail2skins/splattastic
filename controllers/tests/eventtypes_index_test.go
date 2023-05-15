@@ -23,14 +23,14 @@ func TestEventTypesIndex(t *testing.T) {
 	os.Setenv("TEST_RUN", "true")
 	defer os.Setenv("TEST_RUN", "") // Reset the TEST_RUN env var
 
-	// Create two event types
-	eventType1, _ := models.EventTypeCreate("TestEventType1")
-	eventType2, _ := models.EventTypeCreate("TestEventType2")
-
 	// Create a gin router with the routes we need
 	r := gin.Default()
 	r.LoadHTMLGlob("../../templates/**/**")
 	r.GET("/admin/eventtypes", controllers.EventTypesIndex)
+
+	// Create two event types
+	eventType1, _ := models.EventTypeCreate("TestEventType1")
+	eventType2, _ := models.EventTypeCreate("TestEventType2")
 
 	// Create a get request to /admin/eventtypes
 	req, err := http.NewRequest("GET", "/admin/eventtypes", nil)

@@ -1,0 +1,38 @@
+{{ define "partials/index_markers_main.html" }}
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Markers</th>
+                {{ if or .logged_in .test_run }}
+                <th>Edit</th>
+                <th>Delete</th>
+                {{ end }}
+            </tr>
+        </thead>
+    
+    <tbody>
+      {{ $logged_in := .logged_in }} <!-- Store the logged_in value in a variable for the loop -->
+      {{ $test_run := .test_run }} <!-- Store the test_run value in a variable for the loop -->
+    
+      {{ range .markers }}
+        <tr>
+          <td><a href="/admin/markers/{{ .ID }}">{{ .Name }}</td></a>
+            {{ if or $logged_in $test_run }}
+              <td><a class="btn btn-outline-primary" href="/admin/markers/edit/{{ .ID }}" role="button">Edit</a></td>
+              <td><a class="btn btn-outline-danger" href="/admin/markers/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a></td>
+            {{ end }}
+          </tr>
+      {{ else }}
+          <tr>
+          <td colspan="3">No Site Markers yet</td>
+        </tr>
+          
+      {{ end }}
+    
+    </table>
+
+
+
+{{ end }}

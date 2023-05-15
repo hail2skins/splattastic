@@ -34,3 +34,25 @@ func MarkerCreate(c *gin.Context) {
 	models.MarkerCreate(name)
 	c.Redirect(http.StatusFound, "/admin/markers")
 }
+
+// MarkersIndex is a controller for the markers index page
+func MarkersIndex(c *gin.Context) {
+	markers, err := models.MarkersGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"markers/index.html",
+		gin.H{
+			"title":     "Markers",
+			"header":    "Markers",
+			"logged_in": h.IsUserLoggedIn(c),
+			"markers":   markers,
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
