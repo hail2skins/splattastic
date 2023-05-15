@@ -72,6 +72,17 @@ func TestMarkersIndex(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	}
 
+	// Check the response body for marker 1 description
+	expected = marker1.Description
+	if !strings.Contains(rr.Body.String(), expected) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+	// Check the response body for marker 2 description
+	expected = marker2.Description
+	if !strings.Contains(rr.Body.String(), expected) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+
 	// Check if index page has the correct page text
 	expected = "Markers"
 	if !strings.Contains(rr.Body.String(), expected) {

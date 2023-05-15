@@ -38,6 +38,14 @@ func TestMarkersGet(t *testing.T) {
 		t.Errorf("Expected markers to contain %v", marker2.Name)
 	}
 
+	// Check that the markers are the ones we created for description using containsModel function
+	if !helpers.ContainsModelDescription(markersInterface, marker1.Description) {
+		t.Errorf("Expected markers to contain %v", marker1.Description)
+	}
+	if !helpers.ContainsModelDescription(markersInterface, marker2.Description) {
+		t.Errorf("Expected markers to contain %v", marker2.Description)
+	}
+
 	// Delete the markers
 	db.Database.Unscoped().Delete(&marker1)
 	db.Database.Unscoped().Delete(&marker2)

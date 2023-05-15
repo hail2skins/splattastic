@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>Markers</th>
+                <th>Description</th>
                 {{ if or .logged_in .test_run }}
                 <th>Edit</th>
                 <th>Delete</th>
@@ -19,6 +20,7 @@
       {{ range .markers }}
         <tr>
           <td><a href="/admin/markers/{{ .ID }}">{{ .Name }}</td></a>
+          <td>{{ .Description }}</td>
             {{ if or $logged_in $test_run }}
               <td><a class="btn btn-outline-primary" href="/admin/markers/edit/{{ .ID }}" role="button">Edit</a></td>
               <td><a class="btn btn-outline-danger" href="/admin/markers/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a></td>
