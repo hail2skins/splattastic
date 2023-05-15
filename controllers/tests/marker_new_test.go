@@ -33,6 +33,7 @@ func TestMarkerNew(t *testing.T) {
 	}
 
 	// Create a gin router with the routes we need
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.SetFuncMap(funcMap)
 	r.LoadHTMLGlob("../../templates/**/**")
