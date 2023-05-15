@@ -9,6 +9,10 @@
                   <input type="name" class="form-control" id="name" aria-describedby="nameHelp" name="name" value="{{ .marker.Name }}">
                   <div id="nameHelp" class="form-text">Site Marker</div>
                 </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" rows="5" name="description" value="{{ .marker.Description }}"></textarea>
+                </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>   
         </div>

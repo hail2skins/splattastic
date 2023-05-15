@@ -65,6 +65,10 @@ func TestMarkerEdit(t *testing.T) {
 	if !strings.Contains(rr.Body.String(), marker.Name) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), marker.Name)
 	}
+	// Check if marker description is in the response
+	if !strings.Contains(rr.Body.String(), marker.Description) {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), marker.Description)
+	}
 
 	// Cleanup
 	db.Database.Unscoped().Delete(&marker)
