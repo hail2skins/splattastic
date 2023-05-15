@@ -11,7 +11,8 @@ import (
 // UserMarker struct to store user marker data
 type Marker struct {
 	gorm.Model
-	Name string `gorm:"unique;notnull" json:"name"`
+	Name        string `gorm:"unique;notnull" json:"name"`
+	Description string `gorm:"notnull" json:"description"`
 }
 
 // MarkerCreate is a function which will create a new Marker
