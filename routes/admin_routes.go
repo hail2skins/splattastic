@@ -76,8 +76,10 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.DELETE("/eventtypes/:id", controllers.EventTypeDelete)
 
 		// Markers
+		admin.GET("/markers", controllers.MarkersIndex)
 		admin.GET("/markers/new", controllers.MarkerNew)
 		admin.POST("/markers", controllers.MarkerCreate)
+		admin.GET("/markers/:id", controllers.MarkerShow)
 
 	}
 

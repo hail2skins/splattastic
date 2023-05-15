@@ -41,3 +41,17 @@ func MarkersGet() ([]Marker, error) {
 	}
 	return markers, nil
 }
+
+// MarkerShow is a function which will get a single Marker
+func MarkerShow(id uint64) (*Marker, error) {
+	var marker Marker
+	result := db.Database.First(&marker, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("marker not found")
+		}
+		log.Printf("Error getting marker: %v", result.Error)
+		return nil, errors.New("error getting marker")
+	}
+	return &marker, nil
+}
