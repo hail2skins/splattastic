@@ -48,6 +48,7 @@ func TestMarkerUpdate(t *testing.T) {
 	// Create a post request with form data
 	data := url.Values{}
 	data.Set("name", "UpdatedTestMarker")
+	data.Set("description", "This is an updated description")
 	req, err := http.NewRequest("POST", "/admin/markers/"+helpers.UintToString(marker.ID), strings.NewReader(data.Encode()))
 	if err != nil {
 		t.Fatal(err)
@@ -71,6 +72,10 @@ func TestMarkerUpdate(t *testing.T) {
 	// Check if the name was updated
 	if updatedMarker.Name != "UpdatedTestMarker" {
 		t.Errorf("handler returned unexpected body: got %v want %v", updatedMarker.Name, "UpdatedTestMarker")
+	}
+	// Check if the description was updated
+	if updatedMarker.Description != "This is an updated description" {
+		t.Errorf("handler returned unexpected body: got %v want %v", updatedMarker.Description, "This is an updated description")
 	}
 
 	// Delete the marker

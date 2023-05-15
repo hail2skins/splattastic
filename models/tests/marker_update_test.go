@@ -37,6 +37,10 @@ func TestMarkerUpdate(t *testing.T) {
 	if updatedMarker.Name != newName {
 		t.Errorf("expected updated name %v, got %v", newName, updatedMarker.Name)
 	}
+	// Check if the description was updated
+	if updatedMarker.Description != newDescription {
+		t.Errorf("expected updated description %v, got %v", newDescription, updatedMarker.Description)
+	}
 
 	// Cleanup
 	db.Database.Unscoped().Delete(&updatedMarker)
