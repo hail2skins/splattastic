@@ -77,6 +77,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 
 		// Markers
 		admin.GET("/markers/new", controllers.MarkerNew)
+		admin.POST("/markers", controllers.MarkerCreate)
 
 	}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
+	"github.com/hail2skins/splattastic/models"
 )
 
 // MarkerNew is a controller for creating a new marker
@@ -21,4 +22,15 @@ func MarkerNew(c *gin.Context) {
 			"user_id":   c.GetUint("user_id"),
 		},
 	)
+}
+
+// MarkerCreate is a controller for creating a new marker
+func MarkerCreate(c *gin.Context) {
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	models.MarkerCreate(name)
+	c.Redirect(http.StatusFound, "/admin/markers")
 }

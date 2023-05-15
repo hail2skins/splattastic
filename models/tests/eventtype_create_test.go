@@ -15,6 +15,9 @@ func TestEventTypeCreate(t *testing.T) {
 
 	// Create an event type
 	eventType, err := models.EventTypeCreate("TestEventType")
+	if err != nil {
+		t.Errorf("Error creating event type: %v", err)
+	}
 
 	// Test that the event type was created
 	if eventType.Name != "TestEventType" {
