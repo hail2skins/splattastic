@@ -82,6 +82,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/markers/:id", controllers.MarkerShow)
 		admin.GET("/markers/edit/:id", controllers.MarkerEdit)
 		admin.POST("/markers/:id", controllers.MarkerUpdate)
+		admin.DELETE("/markers/:id", controllers.MarkerDelete)
 
 	}
 

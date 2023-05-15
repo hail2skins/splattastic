@@ -153,3 +153,23 @@ func MarkerUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/markers")
 }
+
+// MarkerDelete is a controller for deleting a marker
+func MarkerDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.MarkerDelete(id)
+	if err != nil {
+		log.Printf("Error deleting marker: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/markers")
+}

@@ -70,3 +70,14 @@ func (marker *Marker) Update(name string) error {
 	}
 	return nil
 }
+
+// MarkerDelete is a function which will delete a single Marker
+func MarkerDelete(id uint64) error {
+	var marker Marker
+	result := db.Database.Delete(&marker, id)
+	if result.Error != nil {
+		log.Printf("Error deleting marker: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
