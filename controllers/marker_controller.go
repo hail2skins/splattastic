@@ -120,3 +120,36 @@ func MarkerEdit(c *gin.Context) {
 		},
 	)
 }
+
+// MarkerUpdate is a controller for updating a marker
+func MarkerUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %v", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	marker, err := models.MarkerShow(id)
+	if err != nil {
+		log.Printf("Error getting marker: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = marker.Update(name)
+	if err != nil {
+		log.Printf("Error updating marker: %v", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/markers")
+}

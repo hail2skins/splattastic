@@ -55,3 +55,18 @@ func MarkerShow(id uint64) (*Marker, error) {
 	}
 	return &marker, nil
 }
+
+// Update method updates a marker
+func (marker *Marker) Update(name string) error {
+	if name == "" {
+		return errors.New("marker name cannot be empty")
+	}
+
+	marker.Name = name
+	result := db.Database.Save(&marker)
+	if result.Error != nil {
+		log.Printf("Error updating marker: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
