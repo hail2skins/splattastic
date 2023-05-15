@@ -14,14 +14,15 @@ func TestMarkerUpdate(t *testing.T) {
 	db.Connect()
 
 	// Create a new marker
-	marker, err := models.MarkerCreate("TestMarker")
+	marker, err := models.MarkerCreate("TestMarker", "This is a short test description.")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Update the marker name
 	newName := "UpdatedTestMarker"
-	err = marker.Update(newName)
+	newDescription := "This is an updated description."
+	err = marker.Update(newName, newDescription)
 	if err != nil {
 		t.Fatal(err)
 	}

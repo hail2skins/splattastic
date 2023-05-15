@@ -35,6 +35,7 @@ func TestMarkerCreate(t *testing.T) {
 	}
 
 	// Create a gin router with the routes we need
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.SetFuncMap(funcMap)
 	r.LoadHTMLGlob("../../templates/**/**")
@@ -43,6 +44,7 @@ func TestMarkerCreate(t *testing.T) {
 	// Create a post request with form data
 	data := url.Values{}
 	data.Set("name", "TestMarker")
+	data.Set("description", "This is a small test description")
 	req, err := http.NewRequest("POST", "/admin/markers", strings.NewReader(data.Encode()))
 	if err != nil {
 		t.Fatal(err)

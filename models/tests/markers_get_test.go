@@ -15,8 +15,8 @@ func TestMarkersGet(t *testing.T) {
 	db.Connect()
 
 	// Create two markers
-	marker1, _ := models.MarkerCreate("TestMarker1")
-	marker2, _ := models.MarkerCreate("TestMarker2")
+	marker1, _ := models.MarkerCreate("TestMarker1", "This is a short test description.")
+	marker2, _ := models.MarkerCreate("TestMarker2", "This is a short test description.")
 
 	// Get all markers
 	markers, err := models.MarkersGet()

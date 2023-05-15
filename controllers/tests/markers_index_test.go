@@ -34,14 +34,15 @@ func TestMarkersIndex(t *testing.T) {
 	}
 
 	// Create a gin router with the routes we need
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.SetFuncMap(funcMap)
 	r.LoadHTMLGlob("../../templates/**/**")
 	r.GET("/admin/markers", controllers.MarkersIndex)
 
 	// Create two markers
-	marker1, _ := models.MarkerCreate("Test Marker 1")
-	marker2, _ := models.MarkerCreate("Test Marker 2")
+	marker1, _ := models.MarkerCreate("Test Marker 1", "This is a small test description")
+	marker2, _ := models.MarkerCreate("Test Marker 2", "This is a small test description")
 
 	// Create a get request to /admin/markers
 	req, err := http.NewRequest("GET", "/admin/markers", nil)

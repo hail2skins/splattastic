@@ -35,13 +35,14 @@ func TestMarkerEdit(t *testing.T) {
 	}
 
 	// Create a gin router with the routes we need
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.SetFuncMap(funcMap)
 	r.LoadHTMLGlob("../../templates/**/**")
 	r.GET("/admin/markers/:id/edit", controllers.MarkerEdit)
 
 	// Create a marker
-	marker, _ := models.MarkerCreate("Test Marker")
+	marker, _ := models.MarkerCreate("Test Marker", "This is a small test description")
 
 	// Create a get request to /admin/markers/:id/edit
 	req, err := http.NewRequest("GET", "/admin/markers/"+helpers.UintToString(marker.ID)+"/edit", nil)

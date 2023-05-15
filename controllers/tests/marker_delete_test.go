@@ -41,7 +41,7 @@ func TestMarkerDelete(t *testing.T) {
 	r.DELETE("/admin/markers/:id", controllers.MarkerDelete)
 
 	// Create a marker
-	marker, _ := models.MarkerCreate("TestMarker")
+	marker, _ := models.MarkerCreate("TestMarker", "This is a small test description")
 
 	// Create a delete request to /admin/markers/:id
 	req, err := http.NewRequest("DELETE", "/admin/markers/"+helpers.UintToString(marker.ID), nil)

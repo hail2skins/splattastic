@@ -14,7 +14,7 @@ func TestMarkerShow(t *testing.T) {
 	db.Connect()
 
 	// Create a marker
-	marker, err := models.MarkerCreate("TestMarker")
+	marker, err := models.MarkerCreate("TestMarker", "This is a short test description.")
 	if err != nil {
 		t.Fatal(err)
 	}

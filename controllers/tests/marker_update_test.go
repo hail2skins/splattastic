@@ -36,13 +36,14 @@ func TestMarkerUpdate(t *testing.T) {
 	}
 
 	// Create a gin router with the routes we need
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.SetFuncMap(funcMap)
 	r.LoadHTMLGlob("../../templates/**/**")
 	r.POST("/admin/markers/:id", controllers.MarkerUpdate)
 
 	// Create a marker
-	marker, _ := models.MarkerCreate("TestMarker")
+	marker, _ := models.MarkerCreate("TestMarker", "This is a small test description")
 
 	// Create a post request with form data
 	data := url.Values{}

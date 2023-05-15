@@ -16,12 +16,12 @@ type Marker struct {
 }
 
 // MarkerCreate is a function which will create a new Marker
-func MarkerCreate(name string) (*Marker, error) {
-	if name == "" {
-		return nil, errors.New("marker name cannot be empty")
+func MarkerCreate(name string, description string) (*Marker, error) {
+	if name == "" || description == "" {
+		return nil, errors.New("marker name and description cannot be empty")
 	}
 
-	marker := Marker{Name: name}
+	marker := Marker{Name: name, Description: description}
 	result := db.Database.Create(&marker)
 	if result.Error != nil {
 		log.Printf("Error creating marker: %v", result.Error)
@@ -58,12 +58,13 @@ func MarkerShow(id uint64) (*Marker, error) {
 }
 
 // Update method updates a marker
-func (marker *Marker) Update(name string) error {
+func (marker *Marker) Update(name string, description string) error {
 	if name == "" {
 		return errors.New("marker name cannot be empty")
 	}
 
 	marker.Name = name
+	marker.Description = description
 	result := db.Database.Save(&marker)
 	if result.Error != nil {
 		log.Printf("Error updating marker: %v", result.Error)

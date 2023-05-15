@@ -33,7 +33,14 @@ func MarkerCreate(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	models.MarkerCreate(name)
+
+	description := c.PostForm("description")
+	if description == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	models.MarkerCreate(name, description)
 	c.Redirect(http.StatusFound, "/admin/markers")
 }
 
@@ -137,6 +144,12 @@ func MarkerUpdate(c *gin.Context) {
 		return
 	}
 
+	description := c.PostForm("description")
+	if description == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	marker, err := models.MarkerShow(id)
 	if err != nil {
 		log.Printf("Error getting marker: %v", err.Error())
@@ -144,7 +157,7 @@ func MarkerUpdate(c *gin.Context) {
 		return
 	}
 
-	err = marker.Update(name)
+	err = marker.Update(name, description)
 	if err != nil {
 		log.Printf("Error updating marker: %v", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
