@@ -18,5 +18,5 @@ func LoadDatabase() {
 	db.Database.AutoMigrate(&models.Event{})
 	db.Database.AutoMigrate(&models.UserEventDive{})
 	db.Database.AutoMigrate(&models.Score{})
-
+	db.Database.AutoMigrate(&models.Marker{})
 }

@@ -19,6 +19,7 @@ type User struct {
 	Admin      *bool    `gorm:"default:false" json:"admin"`
 	UserTypeID uint64   `gorm:"not null" json:"usertype_id"`
 	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
+	Markers    []Marker `gorm:"many2many:user_markers;" json:"markers"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
