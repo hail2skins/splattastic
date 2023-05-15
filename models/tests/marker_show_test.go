@@ -29,6 +29,10 @@ func TestMarkerShow(t *testing.T) {
 	if marker.Name != "TestMarker" {
 		t.Errorf("handler returned unexpected marker name: got %v want %v", marker.Name, "TestMarker")
 	}
+	// Check the marker description
+	if marker.Description != "This is a short test description." {
+		t.Errorf("handler returned unexpected marker description: got %v want %v", marker.Description, "This is a short test description.")
+	}
 
 	// Cleanup
 	db.Database.Unscoped().Delete(&marker)
