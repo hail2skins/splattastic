@@ -32,3 +32,14 @@ func TeamTypeCreate(name string) (*TeamType, error) {
 	log.Printf("Team type created: %v", teamType)
 	return &teamType, nil
 }
+
+// TeamTypesGet is a function which will get all TeamTypes
+func TeamTypesGet() ([]TeamType, error) {
+	var teamTypes []TeamType
+	result := db.Database.Find(&teamTypes)
+	if result.Error != nil {
+		log.Printf("Error getting team types: %v", result.Error)
+		return nil, result.Error
+	}
+	return teamTypes, nil
+}

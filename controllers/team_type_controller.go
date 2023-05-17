@@ -35,3 +35,25 @@ func TeamTypeCreate(c *gin.Context) {
 	models.TeamTypeCreate(name)
 	c.Redirect(http.StatusFound, "/admin/teamtypes")
 }
+
+// TeamTypesIndex is a controller for the team_types index page
+func TeamTypesIndex(c *gin.Context) {
+	teamTypes, err := models.TeamTypesGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"teamtypes/index.html",
+		gin.H{
+			"title":     "Team Types",
+			"header":    "Team Types",
+			"teamTypes": teamTypes,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
