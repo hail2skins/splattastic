@@ -88,6 +88,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.GET("/teamtypes", controllers.TeamTypesIndex)
 		admin.GET("/teamtypes/new", controllers.TeamTypeNew)
 		admin.POST("/teamtypes", controllers.TeamTypeCreate)
+		admin.GET("/teamtypes/:id", controllers.TeamTypeShow)
 
 	}
 

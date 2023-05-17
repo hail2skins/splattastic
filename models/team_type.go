@@ -43,3 +43,17 @@ func TeamTypesGet() ([]TeamType, error) {
 	}
 	return teamTypes, nil
 }
+
+// TeamTypeShow is a function which will get a single TeamType
+func TeamTypeShow(id uint64) (*TeamType, error) {
+	var teamType TeamType
+	result := db.Database.First(&teamType, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("team type not found")
+		}
+		log.Printf("Error getting team type: %v", result.Error)
+		return nil, errors.New("error getting team type")
+	}
+	return &teamType, nil
+}

@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -51,6 +53,36 @@ func TeamTypesIndex(c *gin.Context) {
 			"title":     "Team Types",
 			"header":    "Team Types",
 			"teamTypes": teamTypes,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
+
+// TeamTypeShow is a controller for the team_types show page
+func TeamTypeShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	teamType, err := models.TeamTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting team_type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"teamtypes/show.html",
+		gin.H{
+			"title":     "Team Type",
+			"header":    "Team Type",
+			"teamType":  teamType,
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 			"user_id":   c.GetUint("user_id"),
