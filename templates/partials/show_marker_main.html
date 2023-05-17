@@ -1,7 +1,7 @@
 {{ define "partials/show_marker_main.html" }}
 {{ if or .logged_in .test_run }}
-<a class="btn btn-outline-primary" href="/admin/marker/edit/{{ .marker.ID }}" role="button">Edit </a>
-<a class="btn btn-outline-danger" href="/admin/marker/{{ .marker.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete </a>   
+<a class="btn btn-outline-primary" href="/admin/markers/edit/{{ .marker.ID }}" role="button">Edit </a>
+<a class="btn btn-outline-danger" href="/admin/markers/{{ .marker.ID }}" role="button" onclick="sendDelete(event, this.href)">Delete </a>   
 {{ end }}
     <!-- Post Content-->
        <article class="mb-4">

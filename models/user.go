@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"log"
+	"time"
 
 	db "github.com/hail2skins/splattastic/database"
 	"github.com/hail2skins/splattastic/helpers"
@@ -19,7 +20,7 @@ type User struct {
 	Admin      *bool    `gorm:"default:false" json:"admin"`
 	UserTypeID uint64   `gorm:"not null" json:"usertype_id"`
 	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
-	Markers    []Marker `gorm:"many2many:user_markers;" json:"markers"`
+	Markers    []Marker `gorm:"many2many:user_markers;association_jointable_foreignkey:marker_id;jointable_foreignkey:user_id;" json:"markers"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
@@ -51,7 +52,7 @@ func GetUserByEmail(email string) (*User, error) {
 }
 
 // UserCreate creates a new user
-func UserCreate(email string, password string, firstname string, lastname string, username string, usertypeName string) (*User, error) {
+func UserCreate(email string, password string, firstname string, lastname string, username string, usertypeName string, markerNames ...string) (*User, error) {
 	hshPasswd, err := helpers.HashPassword(password)
 	if err != nil {
 		log.Printf("Error hashing password: %v", err)
@@ -73,11 +74,17 @@ func UserCreate(email string, password string, firstname string, lastname string
 		UserType:  usertype,
 	}
 
+	// Always associate the Test Marker used for testing
+	markerNames = append(markerNames, "Test Marker")
+	entry.Markers = findMarkers(markerNames, time.Now())
+
 	result := db.Database.Create(&entry)
 	if result.Error != nil {
 		log.Printf("Error creating user: %v", result.Error)
 		return nil, errors.New("Error creating user")
 	}
+
+	// Marker for any user created before July 1, 2023 has a marker
 
 	return &entry, nil
 }

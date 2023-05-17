@@ -13,6 +13,7 @@ type Marker struct {
 	gorm.Model
 	Name        string `gorm:"unique;notnull" json:"name"`
 	Description string `gorm:"notnull" json:"description"`
+	Users       []User `gorm:"many2many:user_markers;association_jointable_foreignkey:user_id;jointable_foreignkey:marker_id;" json:"users"`
 }
 
 // MarkerCreate is a function which will create a new Marker
