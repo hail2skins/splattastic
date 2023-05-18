@@ -21,6 +21,7 @@ type User struct {
 	UserTypeID uint64   `gorm:"not null" json:"usertype_id"`
 	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
 	Markers    []Marker `gorm:"many2many:user_markers;association_jointable_foreignkey:marker_id;jointable_foreignkey:user_id;" json:"markers"`
+	Teams      []Team   `gorm:"many2many:user_teams;association_jointable_foreignkey:team_id;jointable_foreignkey:user_id;" json:"teams"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
@@ -76,6 +77,7 @@ func UserCreate(email string, password string, firstname string, lastname string
 
 	// Always associate the Test Marker used for testing
 	markerNames = append(markerNames, "Test Marker")
+	// Current marker is for Alpha ending July 1, 2023
 	entry.Markers = findMarkers(markerNames, time.Now())
 
 	result := db.Database.Create(&entry)
