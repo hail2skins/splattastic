@@ -21,4 +21,6 @@ func LoadDatabase() {
 	db.Database.AutoMigrate(&models.Marker{})
 	db.Database.AutoMigrate(&models.UserMarker{})
 	db.Database.AutoMigrate(&models.TeamType{})
+	db.Database.AutoMigrate(&models.Team{})
+	db.Database.AutoMigrate(&models.UserTeam{})
 }
