@@ -94,6 +94,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.DELETE("/teamtypes/:id", controllers.TeamTypeDelete)
 
 		// States
+		admin.GET("/states", controllers.StatesIndex)
 		admin.GET("/states/new", controllers.StateNew)
 		admin.POST("/states", controllers.StateCreate)
 

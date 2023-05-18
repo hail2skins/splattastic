@@ -27,3 +27,15 @@ func ContainsModelDescription(models []interface{}, description string) bool {
 	}
 	return false
 }
+
+// ContainsModelCode checks if a slice of models contains a model with the given code.
+func ContainsModelCode(models []interface{}, code string) bool {
+	for _, m := range models {
+		modelValue := reflect.ValueOf(m)
+		modelName := modelValue.FieldByName("Code")
+		if modelName.IsValid() && modelName.String() == code {
+			return true
+		}
+	}
+	return false
+}

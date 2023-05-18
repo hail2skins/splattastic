@@ -37,3 +37,14 @@ func StateCreate(name, code string) (*State, error) {
 	log.Printf("State created: %v", state)
 	return &state, nil
 }
+
+// StatesGet gets all states
+func StatesGet() ([]State, error) {
+	var states []State
+	result := db.Database.Order("code ASC").Find(&states)
+	if result.Error != nil {
+		log.Printf("Error getting states: %v", result.Error)
+		return nil, result.Error
+	}
+	return states, nil
+}

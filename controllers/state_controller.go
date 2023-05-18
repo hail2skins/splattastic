@@ -41,3 +41,25 @@ func StateCreate(c *gin.Context) {
 	models.StateCreate(name, code)
 	c.Redirect(http.StatusFound, "/admin/states")
 }
+
+// StatesIndex handles the request to display the states index page
+func StatesIndex(c *gin.Context) {
+	states, err := models.StatesGet()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"states/index.html",
+		gin.H{
+			"title":     "States",
+			"header":    "States",
+			"states":    states,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
