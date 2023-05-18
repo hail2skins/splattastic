@@ -74,3 +74,14 @@ func (teamType *TeamType) Update(name string) error {
 	log.Printf("Team type updated: %v", teamType)
 	return nil
 }
+
+// TeamTypeDelete
+func TeamTypeDelete(id uint64) error {
+	var teamType TeamType
+	result := db.Database.Delete(&teamType, id)
+	if result.Error != nil {
+		log.Printf("Error deleting team type: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

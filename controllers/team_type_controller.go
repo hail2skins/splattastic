@@ -151,3 +151,23 @@ func TeamTypeUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/teamtypes")
 }
+
+// TeamTypeDelete is a controller for deleting a team_type
+func TeamTypeDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing team_type id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.TeamTypeDelete(id)
+	if err != nil {
+		log.Printf("Error deleting team_type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/teamtypes")
+}
