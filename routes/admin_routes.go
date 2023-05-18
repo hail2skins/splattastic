@@ -93,6 +93,9 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.POST("/teamtypes/:id", controllers.TeamTypeUpdate)
 		admin.DELETE("/teamtypes/:id", controllers.TeamTypeDelete)
 
+		// States
+		admin.GET("/states", controllers.StateNew)
+
 	}
 
 }
