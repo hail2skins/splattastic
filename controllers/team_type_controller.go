@@ -119,3 +119,35 @@ func TeamTypeEdit(c *gin.Context) {
 		},
 	)
 }
+
+// TeamTypeUpdate is a controller for updating a team_type
+func TeamTypeUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	teamType, err := models.TeamTypeShow(id)
+	if err != nil {
+		log.Printf("Error getting team_type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = teamType.Update(name)
+	if err != nil {
+		log.Printf("Error updating team_type: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/teamtypes")
+}

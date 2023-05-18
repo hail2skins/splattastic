@@ -57,3 +57,20 @@ func TeamTypeShow(id uint64) (*TeamType, error) {
 	}
 	return &teamType, nil
 }
+
+// Update method updates a team_type
+func (teamType *TeamType) Update(name string) error {
+	if name == "" {
+		return errors.New("team type name cannot be empty")
+	}
+
+	teamType.Name = name
+	result := db.Database.Save(&teamType)
+	if result.Error != nil {
+		log.Printf("Error updating team type: %v", result.Error)
+		return result.Error
+	}
+
+	log.Printf("Team type updated: %v", teamType)
+	return nil
+}
