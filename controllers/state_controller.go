@@ -96,3 +96,34 @@ func StateShow(c *gin.Context) {
 		},
 	)
 }
+
+// StateEdit handles the request to display the edit state form
+func StateEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	state, err := models.StateShow(id)
+	if err != nil {
+		log.Printf("Error getting state: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"states/edit.html",
+		gin.H{
+			"title":     "Edit State",
+			"header":    "Edit State",
+			"state":     state,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
