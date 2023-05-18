@@ -22,6 +22,8 @@ type User struct {
 	UserType   UserType `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"user_type"`
 	Markers    []Marker `gorm:"many2many:user_markers;association_jointable_foreignkey:marker_id;jointable_foreignkey:user_id;" json:"markers"`
 	Teams      []Team   `gorm:"many2many:user_teams;association_jointable_foreignkey:team_id;jointable_foreignkey:user_id;" json:"teams"`
+	StateID    *uint64  `json:"state_id"`
+	State      *State   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"state"`
 }
 
 // CheckEmailUsernameAvailable checks if the email is available
