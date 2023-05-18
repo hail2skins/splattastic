@@ -48,3 +48,17 @@ func StatesGet() ([]State, error) {
 	}
 	return states, nil
 }
+
+// StateShow gets a single state
+func StateShow(id uint64) (*State, error) {
+	var state State
+	result := db.Database.First(&state, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("state not found")
+		}
+		log.Printf("Error getting state: %v", result.Error)
+		return nil, errors.New("error getting state")
+	}
+	return &state, nil
+}

@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	h "github.com/hail2skins/splattastic/helpers"
@@ -57,6 +59,37 @@ func StatesIndex(c *gin.Context) {
 			"title":     "States",
 			"header":    "States",
 			"states":    states,
+			"logged_in": h.IsUserLoggedIn(c),
+			"test_run":  os.Getenv("TEST_RUN") == "true",
+			"user_id":   c.GetUint("user_id"),
+		},
+	)
+}
+
+// StateShow handles the request to display a state
+func StateShow(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	state, err := models.StateShow(id)
+	if err != nil {
+		log.Printf("Error getting state: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"states/show.html",
+		gin.H{
+			"title":     "State",
+			"header":    "State",
+			"state":     state,
 			"logged_in": h.IsUserLoggedIn(c),
 			"test_run":  os.Getenv("TEST_RUN") == "true",
 			"user_id":   c.GetUint("user_id"),
