@@ -41,7 +41,7 @@ func StateCreate(name, code string) (*State, error) {
 // StatesGet gets all states
 func StatesGet() ([]State, error) {
 	var states []State
-	result := db.Database.Order("code ASC").Find(&states)
+	result := db.Database.Order("name ASC").Find(&states)
 	if result.Error != nil {
 		log.Printf("Error getting states: %v", result.Error)
 		return nil, result.Error
