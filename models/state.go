@@ -62,3 +62,33 @@ func StateShow(id uint64) (*State, error) {
 	}
 	return &state, nil
 }
+
+// Update method updates a state
+func (state *State) Update(name string, code string) error {
+	if name == "" || code == "" {
+		return errors.New("state name and code cannot be empty")
+	}
+
+	state.Name = name
+	state.Code = code
+
+	result := db.Database.Save(state)
+	if result.Error != nil {
+		log.Printf("Error updating state: %v", result.Error)
+		return result.Error
+	}
+
+	log.Printf("State updated: %v", state)
+	return nil
+}
+
+// StateDelete deletes a state
+func StateDelete(id uint64) error {
+	var state State
+	result := db.Database.Delete(&state, id)
+	if result.Error != nil {
+		log.Printf("Error deleting state: %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

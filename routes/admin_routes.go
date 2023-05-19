@@ -99,6 +99,7 @@ func AdminRoutes(r *gin.RouterGroup) {
 		admin.POST("/states", controllers.StateCreate)
 		admin.GET("/states/:id", controllers.StateShow)
 		admin.GET("/states/edit/:id", controllers.StateEdit)
+		admin.POST("/states/:id", controllers.StateUpdate)
 
 	}
 

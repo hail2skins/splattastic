@@ -127,3 +127,42 @@ func StateEdit(c *gin.Context) {
 		},
 	)
 }
+
+// StateUpdate handles the request to update a state
+func StateUpdate(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	name := c.PostForm("name")
+	if name == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	code := c.PostForm("code")
+	if code == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	state, err := models.StateShow(id)
+	if err != nil {
+		log.Printf("Error getting state: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = state.Update(name, code)
+	if err != nil {
+		log.Printf("Error updating state: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/states")
+}

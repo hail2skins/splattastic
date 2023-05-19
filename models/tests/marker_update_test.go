@@ -7,7 +7,7 @@ import (
 	"github.com/hail2skins/splattastic/models"
 )
 
-// TestMarkerUpdate is a test for the MarkerUpdate controller
+// TestMarkerUpdate is a test for the Update method of the Marker model
 func TestMarkerUpdate(t *testing.T) {
 	// Setup
 	LoadEnv()
