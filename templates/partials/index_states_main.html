@@ -7,6 +7,7 @@
                 <th>States</th>
                 <th>Code</th>
                 {{ if or .logged_in .test_run }}
+                <th>New</th>
                 <th>Edit</th>
                 <th>Delete</th>
                 {{ end }}
@@ -22,6 +23,7 @@
           <td><a href="/admin/states/{{ .ID }}">{{ .Name }}</td></a>
           <td>{{ .Code }}</td>
             {{ if or $logged_in $test_run }}
+              <td><a class="btn btn-outline-primary" href="/admin/states/new" role="button">New</a></td>
               <td><a class="btn btn-outline-primary" href="/admin/states/edit/{{ .ID }}" role="button">Edit</a></td>
               <td><a class="btn btn-outline-danger" href="/admin/states/{{ .ID }}" role="button" onclick="sendDelete(event, this.href)">Delete</a></td>
             {{ end }}
