@@ -166,3 +166,23 @@ func StateUpdate(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, "/admin/states")
 }
+
+// StateDelete handles the request to delete a state
+func StateDelete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing id: %s", err.Error())
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = models.StateDelete(id)
+	if err != nil {
+		log.Printf("Error deleting state: %s", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/states")
+}
