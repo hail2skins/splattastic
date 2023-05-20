@@ -15,6 +15,7 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.GET("/:id", controllers.UserShow)
 		user.GET("/edit/:id", middlewares.CheckCurrentUser(), controllers.UserEdit)
 		user.POST("/:id", middlewares.CheckCurrentUser(), controllers.UserUpdate)
+		// User Events and associated functions
 		user.GET("/:id/event/new", middlewares.CheckCurrentUser(), controllers.EventNew)
 		user.POST("/:id/event", middlewares.CheckCurrentUser(), controllers.EventCreate)
 		user.GET("/:id/event/:event_id", controllers.EventShow)
@@ -26,5 +27,8 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.GET("/:id/event/:event_id/dive/:dive_id/scores", controllers.FetchScores)
 		user.GET("/:id/event/:event_id/dive/:dive_id/total", controllers.EventDiveScoreTotal)
 		user.GET("/:id/event/:event_id/meet_score", controllers.EventMeetScore)
+		// User Teams and associated functions
+		user.GET("/:id/team/new", middlewares.CheckCurrentUser(), controllers.TeamNew)
+
 	}
 }

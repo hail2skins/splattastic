@@ -1,0 +1,70 @@
+{{ define "partials/new_team_main.html" }}
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <h1>New Team</h1>
+            <form action="/user/{{ .user.ID }}/team" method="POST">
+                <div class="mb-3">
+                    <label for="team-name" class="form-label">Team Name</label>
+                    <input type="text" class="form-control" id="team-name" name="team-name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="street" class="form-label">Street</label>
+                    <input type="text" class="form-control" id="street" name="street">
+                </div>
+                <div class="mb-3">
+                    <label for="street1" class="form-label">Street1</label>
+                    <input type="text" class="form-control" id="street1" name="street1">
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city">
+                </div>
+                <div class="mb-3">
+                    <label for="zip" class="form-label">Zip</label>
+                    <input type="text" class="form-control" id="zip" name="zip">
+                </div>
+                <div class="mb-3">
+                    <label for="abbreviation" class="form-label">Abbreviation (ex. Minnesota Diving Academy may be MDA)</label>
+                    <input type="text" class="form-control" id="abbreviation" name="abbreviation">
+                </div>
+                <div class="mb-3">
+                    <label for="team_type" class="form-label">Team Type</label>
+                    <select class="form-select" id="team_type_id" name="team_type_id" required>
+                        <option value="">Select Team Type</option>
+                        <!-- Populate this dropdown with team type options. -->
+                        {{ range $index, $teamType := .team_types }}
+                            <option value="{{ $teamType.ID }}">{{ $teamType.Name }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="state-id" class="form-label">State</label>
+                    <select class="form-select" id="state-id" name="state-id" required>
+                        <option value="">Select State</option>
+                        <!-- Populate this dropdown with state options. -->
+                        {{ range $index, $state := .states }}
+                            <option value="{{ $state.ID }}">{{ $state.Name }} ({{ $state.Code }})</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="associate-user" name="associate-user" checked>
+                    <label class="form-check-label" for="associate-user">Associate with User</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Team</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#state-id').select2();
+    });
+</script>
+
+{{ end }}
