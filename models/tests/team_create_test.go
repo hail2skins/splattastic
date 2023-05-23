@@ -31,6 +31,18 @@ func TestTeamCreate(t *testing.T) {
 		t.Fatalf("Error creating team: %v", err)
 	}
 
+	// Create a team without state and confirm it fails
+	_, err = models.TeamCreate("Test Team", "", "", "", "12345", "", uint64(tt1.ID), 0)
+	if err == nil {
+		t.Fatalf("Error creating team: %v", err)
+	}
+
+	// Create a team without zip and confirm it fails
+	_, err = models.TeamCreate("Test Team", "", "", "", "", "", uint64(tt1.ID), uint64(state.ID))
+	if err == nil {
+		t.Fatalf("Error creating team: %v", err)
+	}
+
 	// Deferred cleanup
 	defer func() {
 		// Delete the team

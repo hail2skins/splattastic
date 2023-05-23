@@ -29,6 +29,6 @@ func UserRoutes(r *gin.RouterGroup) {
 		user.GET("/:id/event/:event_id/meet_score", controllers.EventMeetScore)
 		// User Teams and associated functions
 		user.GET("/:id/team/new", middlewares.CheckCurrentUser(), controllers.TeamNew)
-
+		user.POST("/:id/team", middlewares.CheckCurrentUser(), controllers.TeamCreate)
 	}
 }
