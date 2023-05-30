@@ -65,41 +65,68 @@ func TestTeamCreate(t *testing.T) {
 	helpers.SetupSession(router, uint(userID))
 	router.Use(middlewares.AuthenticateUser())
 
-	// use form to create team
-	data := url.Values{}
-	data.Set("team-name", "Test Team")
-	data.Set("street", "123 Test St")
-	data.Set("street1", "Suite 1")
-	data.Set("city", "Test City")
-	data.Set("zip", "12345")
-	data.Set("abbreviation", "TT")
-	data.Set("team_type_id", strconv.Itoa(int(tt1.ID)))
-	data.Set("state-id", strconv.Itoa(int(state.ID)))
-	data.Set("associate_user", "on")
-
-	// Create a request to send to the above route
-	req, err := http.NewRequest("POST", "/user/"+helpers.UintToString(userID)+"/team", strings.NewReader(data.Encode()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	// Create a response recorder
-	rr := httptest.NewRecorder()
-
-	// Serve the request to the recorder
-	router.ServeHTTP(rr, req)
-
-	// Check the status code
-	if status := rr.Code; status != http.StatusFound {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusFound)
+	// Define test cases
+	var tests = []struct {
+		name             string
+		associate        string
+		expectedTeam     bool
+		expectedUserTeam bool
+	}{
+		{"Test with associate off", "off", true, false},
+		{"Test with associate on", "on", true, true},
 	}
 
-	// Get the created team
-	var team models.Team
-	result := db.Database.Where("name = ?", "Test Team").First(&team)
-	if result.Error != nil {
-		t.Errorf("handler returned unexpected error: got %v", result.Error)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// use form to create team
+			data := url.Values{}
+			data.Set("team-name", "Test Team")
+			data.Set("street", "123 Test St")
+			data.Set("street1", "Suite 1")
+			data.Set("city", "Test City")
+			data.Set("zip", "12345")
+			data.Set("abbreviation", "TT")
+			data.Set("team_type_id", strconv.Itoa(int(tt1.ID)))
+			data.Set("state-id", strconv.Itoa(int(state.ID)))
+			data.Set("associate_user", tt.associate)
+
+			// Create a request to send to the above route
+			req, err := http.NewRequest("POST", "/user/"+helpers.UintToString(userID)+"/team", strings.NewReader(data.Encode()))
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+			// Create a response recorder
+			rr := httptest.NewRecorder()
+
+			// Serve the request to the recorder
+			router.ServeHTTP(rr, req)
+
+			// Check if team was created
+			var team models.Team
+			teamResult := db.Database.Where("name = ?", "Test Team").First(&team)
+			if teamResult.Error != nil && tt.expectedTeam {
+				t.Errorf("expected team to be created, got error: %v", teamResult.Error)
+			} else if tt.expectedTeam == false && teamResult.Error == nil {
+				t.Errorf("did not expect team to be created, but got one")
+			}
+
+			// Check if UserTeam association was created
+			var userTeam models.UserTeam
+			userTeamResult := db.Database.Where("user_id = ?", userID).First(&userTeam)
+			if userTeamResult.Error != nil && tt.expectedUserTeam {
+				t.Errorf("expected UserTeam to be created, got error: %v", userTeamResult.Error)
+			} else if tt.expectedUserTeam == false && userTeamResult.Error == nil {
+				t.Errorf("did not expect UserTeam to be created, but got one")
+			}
+
+			// Clean up UserTeam association
+			db.Database.Unscoped().Where("user_id = ?", userID).Delete(&userTeam)
+
+			// Clean up Team
+			db.Database.Unscoped().Delete(&team)
+		})
 	}
 
 	// Clean up UserTeam association
@@ -109,9 +136,6 @@ func TestTeamCreate(t *testing.T) {
 	// Clean up UserMarkers in case they were created
 	var userMarker models.UserMarker
 	db.Database.Unscoped().Where("user_id = ?", userID).Delete(&userMarker)
-
-	// Clean up Team
-	db.Database.Unscoped().Delete(&team)
 
 	// Clean up Team Type
 	db.Database.Unscoped().Delete(&tt1)
