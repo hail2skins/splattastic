@@ -20,6 +20,7 @@ func UserTeamCreate(userID uint64, teamID uint64) error {
 	}
 	result := db.Database.Create(userTeam)
 	if result.Error != nil {
+		log.Printf("Creating user_team association with User ID: %d and Team ID: %d", userID, teamID)
 		log.Printf("Error creating user_team: %v", result.Error)
 		return result.Error
 	}

@@ -15,6 +15,22 @@ import (
 // TeamNew renders the new team page.
 // Requires a team_type and a state
 func TeamNew(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Error parsing user id: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retrieve the user
+	user, err := models.UserShow(id)
+	if err != nil {
+		log.Printf("Error fetching user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Retrieve list of states for use in the form
 	states, err := models.StatesGet()
 	if err != nil {
@@ -31,6 +47,8 @@ func TeamNew(c *gin.Context) {
 		return
 	}
 
+	// Retrieve the user
+
 	c.HTML(
 		http.StatusOK,
 		"teams/new.html",
@@ -42,13 +60,14 @@ func TeamNew(c *gin.Context) {
 			"team_types": teamTypes,
 			"test_run":   os.Getenv("TEST_RUN") == "true",
 			"user_id":    c.GetUint("user_id"),
+			"user":       user,
 		},
 	)
 }
 
 // TeamCreate creates a new team
 func TeamCreate(c *gin.Context) {
-	name := c.PostForm("name")
+	name := c.PostForm("team-name")
 	if name == "" {
 		log.Printf("Error creating team: name is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "name is required"})
@@ -70,15 +89,15 @@ func TeamCreate(c *gin.Context) {
 	teamTypeID, err := strconv.ParseUint(teamTypeIDStr, 10, 64)
 	if err != nil {
 		log.Printf("Error creating team: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "team type ID is required"})
 		return
 	}
 
-	stateIDStr := c.PostForm("state_id")
+	stateIDStr := c.PostForm("state-id")
 	stateID, err := strconv.ParseUint(stateIDStr, 10, 64)
 	if err != nil {
 		log.Printf("Error creating team: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "state ID is required"})
 		return
 	}
 
@@ -98,14 +117,7 @@ func TeamCreate(c *gin.Context) {
 
 	// Associate the user with the team if the checkbox was checked
 	if associateUser == "on" {
-		userIDVal, exists := c.Get("user_id")
-		if !exists {
-			log.Printf("Error associating user with team: user_id not found in context")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "user_id not found in context"})
-			return
-		}
-		userID := uint64(userIDVal.(uint))
-		err = models.UserTeamCreate(uint64(team.ID), userID)
+		err = models.UserTeamCreate(userID, uint64(team.ID))
 		if err != nil {
 			log.Printf("Error associating user with team: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
