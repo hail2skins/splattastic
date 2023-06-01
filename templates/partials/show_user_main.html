@@ -15,7 +15,9 @@
                     <p class="card-text">Type: {{ .user.UserType.Name }}</p>
                     <p class="card-text">Team: <a href="#" class="card-link">Team</a></p>
                    </div>
-                   <div class="card-footer">Something</div>
+                   <div class="card-footer">
+                    <a href="/user/{{ .user.ID }}/team/new" class="card-link">New Team</a>
+                   </div>
                 </div>
                 <div class="card">
                   
